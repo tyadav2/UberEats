@@ -1,4 +1,4 @@
-# UberEATS Prototype  
+# UberEATS Full-Stack Prototype  
 
 ## Overview  
 This project is a prototype of **UberEATS**, developed using **React.js** for the frontend and **Node.js (Express.js) with MySQL** for the backend. It supports two user personas: **Customers** and **Restaurants**, providing features such as authentication, profile management, order placement, and tracking.
