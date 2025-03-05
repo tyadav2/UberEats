@@ -1,10 +1,11 @@
 const express = require("express");
-const { placeOrder, getUserOrders } = require("../controllers/orderController");
-const protect = require("../middleware/authMiddleware");
+const { getOrders, createOrder, updateOrderStatus } = require("../controllers/orderController"); // ✅ Ensure correct imports
 
 const router = express.Router();
 
-router.post("/place", placeOrder); //add protect
-router.get("/my-orders", protect, getUserOrders);
+// ✅ Ensure these functions exist in orderController.js
+router.get("/", getOrders);
+router.post("/", createOrder);
+router.put("/:orderId/status", updateOrderStatus);
 
 module.exports = router;
