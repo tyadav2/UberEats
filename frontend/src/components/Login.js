@@ -5,24 +5,45 @@ import { useNavigate } from "react-router-dom";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("customer"); // Default role is customer
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/api/users/login", {
-        email,
-        password,
-      });
+      // Ensure role is correctly set
+      if (!role) {
+        alert("Please select a role (Customer or Restaurant)!");
+        return;
+      }
 
-      localStorage.setItem("token", JSON.stringify(response.data.token));
-      console.log("Token stored:", localStorage.getItem("token"));
-      console.log("Login successful:", response.data);
+      // Corrected API URL based on role
+      const apiUrl = role === "customer"
+        ? "http://localhost:5000/api/users/login"  // Corrected for customer
+        : "http://localhost:5000/api/restaurants/login"; // Corrected for restaurant
+
+      console.log("Selected Role:", role);
+      console.log("API Request URL:", apiUrl);
+
+      // Make API request with email and password
+      const response = await axios.post(apiUrl, { email, password });
+
+      // Store the token in localStorage
+      localStorage.setItem(`${role}Token`, JSON.stringify(response.data.token));
+
+      console.log(`${role.charAt(0).toUpperCase() + role.slice(1)} login successful:`, response.data);
       alert("Login successful!");
 
-      navigate("/dashboard"); // Redirect user after login
+      // Redirect based on role
+      navigate(role === "customer" ? "/dashboard" : "/restaurant/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
-      alert("Invalid credentials!");
+
+      // Improved error handling
+      if (error.response) {
+        alert(error.response.data.message || "Invalid credentials!");
+      } else {
+        alert("Login failed! Please check your internet connection.");
+      }
     }
   };
 
@@ -34,8 +55,38 @@ function Login() {
       </h1>
 
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
-        <h2 className="text-2xl font-semibold text-center mb-4">Customer Login</h2>
+        <h2 className="text-2xl font-semibold text-center mb-4">Login</h2>
 
+        {/* Role Selector */}
+        <div className="mb-4">
+          <label className="block mb-2 text-sm font-medium text-gray-700">Login As</label>
+          <div className="flex gap-4">
+            <label>
+              <input
+                type="radio"
+                name="role"
+                value="customer"
+                checked={role === "customer"}
+                onChange={(e) => setRole(e.target.value)}
+                className="mr-2"
+              />
+              Customer
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="role"
+                value="restaurant"
+                checked={role === "restaurant"}
+                onChange={(e) => setRole(e.target.value)}
+                className="mr-2"
+              />
+              Restaurant
+            </label>
+          </div>
+        </div>
+
+        {/* Login Form */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -74,46 +125,3 @@ function Login() {
 }
 
 export default Login;
-
-
-
-
-
-/*import { useState } from "react";
-import axios from "axios";
-
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleLogin = async () => {
-    try {
-      const response = await axios.post("http://localhost:5000/api/users/login", { 
-        email, 
-        password 
-      });
-  
-      localStorage.setItem("token", JSON.stringify(response.data.token));
-
-      console.log("Token stored:", localStorage.getItem("token")); 
-  
-      console.log("Login successful:", response.data);
-      alert("Login successful!");
-    } catch (error) {
-      console.error("Login failed:", error);
-      alert("Invalid credentials!");
-    }
-  };
-  
-
-  return (
-    <div>
-      <input type="email" onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-      <input type="password" onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
-      <button onClick={handleLogin}>Login</button>
-    </div>
-  );
-}
-
-export default Login;
-*/
