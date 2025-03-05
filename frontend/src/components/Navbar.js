@@ -7,10 +7,22 @@ function Navbar() {
 
   const handleLogin = () => {
     navigate("/login");
+    setIsOpen(false);
   };
 
   const handleSignup = () => {
     navigate("/signup");
+    setIsOpen(false);
+  };
+
+  const handleRestaurantLogin = () => {
+    navigate("/restaurant/login");
+    setIsOpen(false);
+  };
+
+  const handleRestaurantSignup = () => {
+    navigate("/restaurant/signup");
+    setIsOpen(false);
   };
 
   return (
@@ -22,7 +34,14 @@ function Navbar() {
           ☰
         </button>
 
-        <div className=" text-2xl font-bold ml-4 flex-1">Uber Eats</div>
+        {/* Clickable Uber Eats Branding */}
+        <div
+          className="text-2xl font-bold ml-4 flex-1 cursor-pointer"
+          onClick={() => navigate("/")} // Navigate to Home when clicked
+        >
+          Uber <span className="text-green-600 ml-1">Eats</span>
+        </div>
+
         <ul className="flex gap-6 items-center text-lg font-medium">
           <li>
             <button onClick={handleLogin} className="text-black">
@@ -62,34 +81,36 @@ function Navbar() {
           ✕
         </button>
 
+        {/* Clickable Uber Eats Branding */}
+        <div
+          className="text-2xl font-bold text-black flex items-center mb-6 cursor-pointer"
+          onClick={() => navigate("/")} // Navigate to Home when clicked
+        >
+          Uber <span className="text-green-600 ml-1">Eats</span>
+        </div>
 
-        {/* Uber Eats Branding */}
-      <div className="text-2xl font-bold text-black flex items-center mb-6">
-        Uber <span className="text-green-600 ml-1">Eats</span>
-      </div>
-
-        
-        
         {/* Sidebar Links */}
         <ul className="space-y-4">
-        <li>
-          <button onClick={handleSignup} className="bg-black text-white px-4 py-2 w-full rounded-md">
-            Sign Up
-          </button>
-        </li>
           <li>
-           <button onClick={handleLogin} className="border border-black px-4 py-2 w-full rounded-md">
-              Log in
+            <button onClick={handleSignup} className="bg-black text-white px-4 py-2 w-full rounded-md">
+              Sign Up
             </button>
           </li>
           <li>
-            <button className="hover:text-green-600">Create a Business Account</button>
+            <button onClick={handleLogin} className="border border-black px-4 py-2 w-full rounded-md">
+              Log in
+            </button>
+          </li>
+          {/* Restaurant Links */}
+          <li>
+            <button onClick={handleRestaurantSignup} className="hover:text-green-600">
+              Add Your Restaurant
+            </button>
           </li>
           <li>
-            <button className="hover:text-green-600">Add Your Restaurant</button>
-          </li>
-          <li>
-            <button className="hover:text-green-600">Restaurant Login</button>
+            <button onClick={handleRestaurantLogin} className="hover:text-green-600">
+              Restaurant Login
+            </button>
           </li>
         </ul>
       </div>
@@ -98,47 +119,3 @@ function Navbar() {
 }
 
 export default Navbar;
-
-
-
-
-/*import React from "react";
-import { useNavigate } from "react-router-dom";
-
-function Navbar() {
-  const navigate = useNavigate();
-
-  const handleLogin = () => {
-    navigate("/login");
-  };
-  const handleSignup = () => {
-    navigate("/signup");
-  };
-
-  return (
-    <nav className="absolute top-0 left-0 w-full flex justify-between items-center p-4 bg-transparent z-10">
-      <div className="text-2xl font-bold">Uber Eats</div>
-      <ul className="flex gap-6 items-center text-lg font-medium">
-      
-        <li>
-          <button
-            onClick={handleLogin}
-            className=" text-black ">Login
-            </button>
-            </li>
-            <li>
-          <button
-            onClick={handleSignup}
-            className="bg-black text-white px-4 py-2 rounded-full hover:bg-gray-800">Sign Up
-            </button>
-            </li>
-        
-      </ul>
-    </nav>
-  );
-}
-
-export default Navbar;
-
-/*
-*/
