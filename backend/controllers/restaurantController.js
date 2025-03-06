@@ -4,25 +4,67 @@ const jwt = require("jsonwebtoken");
 
 // Restaurant signup
 exports.registerRestaurant = async (req, res) => {
-    const { name, email, password, location, description, businessHours, cuisine } = req.body;
+    const {
+        name,
+        cuisine,
+        category,
+        location,
+        address,
+        phone_number,
+        email,
+        password,
+        description,
+        business_hours,
+        price_range,
+        delivery_time,
+        image_url, // optional field
+        rating,    // optional: will default to 0.0 if not provided
+        is_open    // optional: will default to true if not provided
+    } = req.body;
 
     console.log("Received Signup Data:", req.body);
 
     try {
-        // Ensure all required fields are present
-        if (!name || !email || !password || !location || !description || !businessHours || !cuisine) {
-            return res.status(400).json({ message: "All fields are required!" });
+        // Ensure all required fields are provided
+        if (
+            !name ||
+            !cuisine ||
+            !category ||
+            !location ||
+            !address ||
+            !phone_number ||
+            !email ||
+            !password ||
+            !description ||
+            !business_hours ||
+            !price_range ||
+            !delivery_time
+        ) {
+            return res.status(400).json({ message: "All required fields must be provided!" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const restaurant = await Restaurant.create({ 
-            name, 
-            email, 
-            password: hashedPassword, 
-            location, 
-            description, 
-            businessHours, 
-            cuisine 
+
+        // Use provided rating and is_open or default to 0.0 and true respectively
+        const ratingValue = rating !== undefined ? rating : 0.0;
+        const isOpenValue = is_open !== undefined ? is_open : true;
+
+        const restaurant = await Restaurant.create({
+            name,
+            cuisine,
+            category,
+            location,
+            address,
+            phone_number,
+            email,
+            password: hashedPassword,
+            description,
+            business_hours,
+            price_range,
+            delivery_time,
+            image_url: image_url || null,
+            rating: ratingValue,
+            is_open: isOpenValue
         });
 
         res.status(201).json({ message: "Restaurant registered successfully", restaurant });
@@ -45,18 +87,25 @@ exports.loginRestaurant = async (req, res) => {
         // Generate token
         const token = jwt.sign({ id: restaurant.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-        // ✅ Send restaurant details along with the token
         res.json({
             message: "Restaurant logged in",
             token,
             restaurant: {
                 id: restaurant.id,
                 name: restaurant.name,
-                email: restaurant.email,
-                location: restaurant.location,
-                description: restaurant.description,
-                businessHours: restaurant.businessHours,
                 cuisine: restaurant.cuisine,
+                category: restaurant.category,
+                location: restaurant.location,
+                address: restaurant.address,
+                phone_number: restaurant.phone_number,
+                email: restaurant.email,
+                description: restaurant.description,
+                business_hours: restaurant.business_hours,
+                rating: restaurant.rating,
+                image_url: restaurant.image_url,
+                price_range: restaurant.price_range,
+                delivery_time: restaurant.delivery_time,
+                is_open: restaurant.is_open,
             }
         });
     } catch (error) {
@@ -64,6 +113,7 @@ exports.loginRestaurant = async (req, res) => {
     }
 };
 
+// Get Restaurant Profile
 exports.getRestaurantProfile = async (req, res) => {
     try {
         const restaurant = await Restaurant.findByPk(req.restaurant.id);
@@ -76,31 +126,45 @@ exports.getRestaurantProfile = async (req, res) => {
     }
 };
 
-
+// Update Restaurant Profile
 exports.updateRestaurantProfile = async (req, res) => {
-  try {
-      if (!req.restaurant) {
-          return res.status(401).json({ message: "Not authorized, token failed" });
-      }
+    try {
+        if (!req.restaurant) {
+            return res.status(401).json({ message: "Not authorized, token failed" });
+        }
 
-      const restaurant = await Restaurant.findByPk(req.restaurant.id);
+        const restaurant = await Restaurant.findByPk(req.restaurant.id);
+        if (!restaurant) {
+            return res.status(404).json({ message: "Restaurant not found" });
+        }
 
-      if (!restaurant) {
-          return res.status(404).json({ message: "Restaurant not found" });
-      }
+        // Update fields if provided; if not, keep the existing values
+        restaurant.name = req.body.name || restaurant.name;
+        restaurant.cuisine = req.body.cuisine || restaurant.cuisine;
+        restaurant.category = req.body.category || restaurant.category;
+        restaurant.location = req.body.location || restaurant.location;
+        restaurant.address = req.body.address || restaurant.address;
+        restaurant.phone_number = req.body.phone_number || restaurant.phone_number;
+        restaurant.email = req.body.email || restaurant.email;
+        restaurant.description = req.body.description || restaurant.description;
+        restaurant.business_hours = req.body.business_hours || restaurant.business_hours;
+        restaurant.price_range = req.body.price_range || restaurant.price_range;
+        restaurant.delivery_time = req.body.delivery_time || restaurant.delivery_time;
+        restaurant.image_url = req.body.image_url || restaurant.image_url;
 
-      restaurant.name = req.body.name || restaurant.name;
-      restaurant.email = req.body.email || restaurant.email;
-      restaurant.location = req.body.location || restaurant.location;
-      restaurant.description = req.body.description || restaurant.description;
-      restaurant.businessHours = req.body.businessHours || restaurant.businessHours;
-      restaurant.cuisine = req.body.cuisine || restaurant.cuisine;
+        // Optionally update rating and is_open if provided
+        if (req.body.rating !== undefined) {
+            restaurant.rating = req.body.rating;
+        }
+        if (req.body.is_open !== undefined) {
+            restaurant.is_open = req.body.is_open;
+        }
 
-      await restaurant.save();
+        await restaurant.save();
 
-      res.json({ message: "Profile updated successfully", restaurant });
-  } catch (error) {
-      console.error("Update Profile Error:", error);
-      res.status(500).json({ message: "Server error" });
-  }
+        res.json({ message: "Profile updated successfully", restaurant });
+    } catch (error) {
+        console.error("Update Profile Error:", error);
+        res.status(500).json({ message: "Server error" });
+    }
 };
