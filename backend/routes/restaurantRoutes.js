@@ -1,19 +1,16 @@
 const express = require("express");
-const { registerRestaurant, loginRestaurant, updateRestaurantProfile, getRestaurantProfile } = require("../controllers/restaurantController");
-const { protect } = require("../middleware/authMiddleware"); // ✅ Ensure correct import
-
 const router = express.Router();
+const Restaurant = require("../models/Restaurant");
 
-// Restaurant signup
-router.post("/signup", registerRestaurant);
-
-// Restaurant login
-router.post("/login", loginRestaurant);
-
-// Update profile route for restaurant (Requires authentication)
-router.put("/profile", protect, updateRestaurantProfile); // ✅ Now properly working
-
-
-router.get("/profile", protect, getRestaurantProfile);
+// GET all restaurants
+router.get("/", async (req, res) => {
+    try {
+        const restaurants = await Restaurant.findAll();
+        res.json(restaurants);
+    } catch (error) {
+        console.error("Error fetching restaurants:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 
 module.exports = router;
