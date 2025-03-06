@@ -28,7 +28,7 @@ function Navbar() {
   return (
     <>
       {/* Navbar */}
-      <nav className="absolute top-0 left-0 w-full flex justify-between items-center p-4 bg-transparent z-10">
+      <nav className="main-navbar absolute top-0 left-0 w-full flex justify-between items-center p-4 bg-transparent z-10">
         {/* Hamburger Button */}
         <button onClick={() => setIsOpen(true)} className="text-2xl font-bold">
           ☰
