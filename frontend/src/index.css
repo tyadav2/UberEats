@@ -16,3 +16,7 @@ code {
     monospace;
 }
 
+.no-navbar .main-navbar {
+  display: none;
+}
+
