@@ -43,3 +43,16 @@ CREATE TABLE Orders (
     FOREIGN KEY (userId) REFERENCES Users(id),
     FOREIGN KEY (restaurantId) REFERENCES Restaurants(id)
 );
+
+CREATE TABLE IF NOT EXISTS Dishes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    ingredients TEXT,
+    image VARCHAR(255),
+    price DECIMAL(10,2) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    restaurantId INT NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (restaurantId) REFERENCES Restaurants(id)
+);
+
