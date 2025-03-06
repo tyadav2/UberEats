@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Restaurant = require("../models/Restaurant");
+const { loginRestaurant, registerRestaurant, getRestaurantProfile, updateRestaurantProfile } = require("../controllers/restaurantController");
+const { protect } = require("../middleware/authMiddleware");
 
 // GET all restaurants
 router.get("/", async (req, res) => {
@@ -12,5 +14,14 @@ router.get("/", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.post("/signup", registerRestaurant)
+
+// New route for restaurant login
+router.post("/login", loginRestaurant);
+
+//router.post("/signup", registerRestaurant);
+router.get("/profile", protect, getRestaurantProfile);
+router.put("/profile", protect, updateRestaurantProfile);
 
 module.exports = router;

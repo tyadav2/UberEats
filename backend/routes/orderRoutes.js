@@ -3,9 +3,70 @@ const router = express.Router();
 const { protect } = require("../middleware/authMiddleware");
 const Order = require("../models/Order");
 const Restaurant = require("../models/Restaurant");
-const User = require("../models/User");
+const { getRestaurantOrders } = require("../controllers/orderController");
 
-// ✅ Place a new order (User Only)
+
+// Place a new order (Customer Only)
+router.post("/", protect, async (req, res) => {
+  try {
+    const { restaurantId, totalAmount, items, paymentMethod } = req.body;
+
+    // Ensure the requester is a customer
+    if (!req.user) {
+      return res.status(403).json({ error: "Only users can place orders" });
+    }
+
+    // Validate that the restaurant exists
+    const restaurant = await Restaurant.findByPk(restaurantId);
+    if (!restaurant) {
+      return res.status(404).json({ error: "Restaurant not found" });
+    }
+
+    // Create a new order using details from the request
+    const newOrder = await Order.create({
+      userId: req.user.id,
+      userEmail: req.user.email,
+      restaurantId,
+      restaurantName: restaurant.name,
+      totalAmount,
+      status: "Pending",
+      estimatedDeliveryTime: "30 min",
+      paymentMethod,
+      items
+    });
+
+    res.status(201).json({ message: "Order placed successfully", order: newOrder });
+  } catch (error) {
+    console.error("Error placing order:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Existing order history endpoint for users (customer-only)
+router.get("/history", protect, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(403).json({ message: "Access denied: Not a customer" });
+      }
+      
+      const orders = await Order.findAll({
+        where: { userId: req.user.id },
+        order: [['createdAt', 'DESC']],
+      });
+  
+      if (!orders.length) {
+        return res.status(404).json({ message: "No orders found" });
+      }
+      
+      res.json(orders);
+    } catch (error) {
+      console.error("Error fetching user order history:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+
+
 router.post("/", protect, async (req, res) => {
     try {
         const { restaurantId, totalAmount, items, paymentMethod } = req.body;
@@ -39,7 +100,8 @@ router.post("/", protect, async (req, res) => {
     }
 });
 
-// ✅ Get all orders for a user or restaurant
+
+// Get all orders for a user or restaurant
 router.get("/", protect, async (req, res) => {
     try {
         let orders;
@@ -65,7 +127,7 @@ router.get("/", protect, async (req, res) => {
     }
 });
 
-// ✅ Update order status (Restaurant Only)
+// Update order status (Restaurant Only)
 router.put("/:orderId", protect, async (req, res) => {
     try {
         if (!req.restaurant) {
@@ -94,5 +156,9 @@ router.put("/:orderId", protect, async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+// New route for restaurants to view (and filter) their orders
+router.get("/restaurant", protect, getRestaurantOrders);
+
 
 module.exports = router;
