@@ -1,8 +1,8 @@
 // models/Dish.js
 const { DataTypes } = require("sequelize");
-const db = require("../config/database"); // Adjust the path to your database config
+const sequelize = require("../config/db"); 
 
-const Dish = db.define("Dish", {
+const Dish = sequelize.define("Dish", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -13,23 +13,19 @@ const Dish = db.define("Dish", {
     allowNull: false,
   },
   ingredients: {
-    type: DataTypes.STRING, // Or DataTypes.TEXT if you expect longer text
+    type: DataTypes.TEXT,
     allowNull: true,
   },
   image: {
-    type: DataTypes.STRING, // URL or path to image
+    type: DataTypes.STRING,
     allowNull: true,
   },
   price: {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
-  description: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
   category: {
-    type: DataTypes.STRING, // e.g., Appetizer, Salad, Main Course
+    type: DataTypes.STRING,
     allowNull: false,
   },
   restaurantId: {
