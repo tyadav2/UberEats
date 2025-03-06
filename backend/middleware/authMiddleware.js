@@ -3,7 +3,12 @@ const User = require("../models/User");
 const Restaurant = require("../models/Restaurant");
 
 const protect = async (req, res, next) => {
-    const token = req.header("Authorization");
+    let token = req.header("Authorization");
+
+    // Check if token is provided and starts with "Bearer "
+    if (token && token.startsWith("Bearer ")) {
+        token = token.split(" ")[1]; // Extract token without "Bearer "
+    }
 
     if (!token) {
         return res.status(401).json({ message: "Unauthorized access, no token" });
@@ -30,7 +35,6 @@ const protect = async (req, res, next) => {
     }
 };
 
-// ✅ Middleware to ensure only the order owner can access an order
 const protectOrderAccess = async (req, res, next) => {
     const { user, restaurant } = req;
 
