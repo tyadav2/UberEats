@@ -8,7 +8,7 @@ import Favorites from './pages/Favorites';
 import RestaurantSignup from "./pages/RestaurantSignup";
 import RestaurantLogin from "./pages/RestaurantLogin";
 import RestaurantList from './components/RestaurantList';
-import RestaurantDashboard from './pages/RestaurantDashboard';
+import RestaurantDashboard from "./pages/RestaurantDashboard";
 import Profile from "./pages/UserProfile";
 import Orders from "./pages/Orders";
 
