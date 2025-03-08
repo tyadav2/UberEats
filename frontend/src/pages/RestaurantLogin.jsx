@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const RestaurantLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -14,14 +16,22 @@ const RestaurantLogin = () => {
             const response = await axios.post('http://localhost:5000/api/restaurants/login', data);
             localStorage.setItem('restaurantToken', response.data.token);
             alert(response.data.message);
-            window.location.href = '/restaurant/dashboard'; // Redirect to dashboard
+            navigate('/restaurant/dashboard'); // Redirect to dashboard
         } catch (error) {
             alert('Error: ' + (error.response?.data?.message || 'Login failed!'));
         }
     };
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-100">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+            {/* Logo with Home Redirection */}
+            <div className="absolute top-6 left-6 cursor-pointer" onClick={() => navigate('/')}>
+                <h1 className="text-2xl font-bold text-green-600">
+                    Uber Eats <span className="text-gray-700">for Merchants</span>
+                </h1>
+            </div>
+
+            {/* Login Form */}
             <div className="bg-white p-8 rounded-lg shadow-lg w-96">
                 <h2 className="text-2xl font-bold mb-4 text-center">Restaurant Login</h2>
                 <form onSubmit={handleSubmit}>
