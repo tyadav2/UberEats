@@ -5,7 +5,6 @@ const Order = require("../models/Order");
 const Restaurant = require("../models/Restaurant");
 const { getRestaurantOrders, cancelOrder } = require("../controllers/orderController");
 
-
 // Place a new order (Customer Only)
 router.post("/", protect, async (req, res) => {
   try {
