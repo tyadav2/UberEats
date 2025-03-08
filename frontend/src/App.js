@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { useState } from "react";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Signup from "./pages/Signup";
@@ -11,8 +12,15 @@ import RestaurantList from './components/RestaurantList';
 import RestaurantDashboard from "./pages/RestaurantDashboard";
 import Profile from "./pages/UserProfile";
 import Orders from "./pages/Orders";
+import CartPage from "./pages/CartPage";
+import RestaurantPage from "./pages/RestaurantPage";
 
 function App() {
+    const [cart, setCart] = useState([]);
+
+  const addToCart = (dish) => {
+    setCart((prevCart) => [...prevCart, dish]); //Add dish to cart
+  };
     return (
         <Router>
             <Routes>
@@ -28,6 +36,8 @@ function App() {
                 <Route path="/favorites" element={<Favorites />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/orders" element={<Orders />} />
+                <Route path="/restaurant/:id" element={<RestaurantPage addToCart={addToCart} />} />
+                <Route path="/cart" element={<CartPage cart={cart} setCart={setCart} />} />
             </Routes>
         </Router>
     );
