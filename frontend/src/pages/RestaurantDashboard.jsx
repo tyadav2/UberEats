@@ -274,7 +274,7 @@ const RestaurantDashboard = () => {
     // Logout
     const handleLogout = () => {
         localStorage.removeItem("restaurantToken");
-        navigate("/");
+        navigate("/restaurant/login");
     };
 
     if (!restaurant) {
