@@ -7,6 +7,7 @@ const { protect } = require("../middleware/authMiddleware");
 // GET all restaurants
 router.get("/", async (req, res) => {
     try {
+        console.log(req.headers);
         const restaurants = await Restaurant.findAll();
         res.json(restaurants);
     } catch (error) {
