@@ -3,7 +3,7 @@ const router = express.Router();
 const { protect } = require("../middleware/authMiddleware");
 const Order = require("../models/Order");
 const Restaurant = require("../models/Restaurant");
-const { getRestaurantOrders } = require("../controllers/orderController");
+const { getRestaurantOrders, cancelOrder } = require("../controllers/orderController");
 
 
 // Place a new order (Customer Only)
@@ -64,41 +64,6 @@ router.get("/history", protect, async (req, res) => {
       res.status(500).json({ message: "Server error" });
     }
   });
-  
-
-
-router.post("/", protect, async (req, res) => {
-    try {
-        const { restaurantId, totalAmount, items, paymentMethod } = req.body;
-
-        if (!req.user) {
-            return res.status(403).json({ error: "Only users can place orders" });
-        }
-
-        // Validate restaurant existence
-        const restaurant = await Restaurant.findByPk(restaurantId);
-        if (!restaurant) {
-            return res.status(404).json({ error: "Restaurant not found" });
-        }
-
-        const newOrder = await Order.create({
-            userId: req.user.id,
-            userEmail: req.user.email,
-            restaurantId,
-            restaurantName: restaurant.name,
-            totalAmount,
-            status: "Pending",
-            estimatedDeliveryTime: "30 min",
-            paymentMethod,
-            items
-        });
-
-        res.status(201).json({ message: "Order placed successfully", order: newOrder });
-    } catch (error) {
-        console.error("Error placing order:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
 
 
 // Get all orders for a user or restaurant
@@ -159,6 +124,9 @@ router.put("/:orderId", protect, async (req, res) => {
 
 // New route for restaurants to view (and filter) their orders
 router.get("/restaurant", protect, getRestaurantOrders);
+
+// Cancel an order
+router.delete("/:orderId", protect, cancelOrder);
 
 
 module.exports = router;
