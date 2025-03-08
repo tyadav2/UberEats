@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ToggleButtons from "./ToggleButtons.js";
-
-// Import the icons you need from react-icons (adjust to your preference)
 import {
   FaReceipt,
   FaHeart,
@@ -15,49 +13,53 @@ import {
   FaShoppingCart,
 } from "react-icons/fa";
 
-
-  
-
 function DashboardNavbar() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [address, setAddress] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+
+  // Fetch address suggestions from OpenStreetMap
+  const handleInputChange = async (e) => {
+    const query = e.target.value;
+    setAddress(query);
+
+    if (query.length > 2) {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${query}`,
+          {
+            headers: {
+              "User-Agent": "UberEatsClone/1.0 (contact: adi.tekale99@gmail.com)",
+              "Accept-Language": "en",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch address suggestions");
+        }
+
+        const data = await response.json();
+        setSuggestions(data);
+      } catch (error) {
+        console.error("Address fetch error:", error);
+      }
+    } else {
+      setSuggestions([]); // Clear suggestions when input is less than 3 chars
+    }
+  };
+
+  // Handle address selection
+  const handleSelect = (selectedAddress) => {
+    setAddress(selectedAddress);
+    setSuggestions([]);
+  };
 
   const handleLogout = () => {
     navigate("/");
     setIsOpen(false);
   };
-
-  const handleRestaurantDashboard = () => {
-    navigate("/restaurant/dashboard");
-    setIsOpen(false);
-  };
-
-  const handleRestaurantSignup = () => {
-    navigate("/restaurant/signup");
-    setIsOpen(false);
-  };
-
-  const handleOrders = () => {
-    navigate("/orders");
-    setIsOpen(false);
-  };
-
-  const handleFavorites = () => {
-    navigate("/favorites");
-    setIsOpen(false);
-  };
-
-  const handleProfile = () => {
-    navigate("/profile");
-    setIsOpen(false);
-  };
-
-  const handleOrderCart = () => {
-    navigate("/order/cart");
-    setIsOpen(false);
-  };
-
-  
 
   return (
     <>
@@ -71,7 +73,7 @@ function DashboardNavbar() {
         {/* Clickable Uber Eats Branding */}
         <div
           className="text-2xl font-bold flex items-center pl-5 cursor-pointer"
-          onClick={() => navigate("/dashboard")} // Navigate to Dashboard when clicked
+          onClick={() => navigate("/dashboard")}
         >
           Uber <span className="text-green-600 ml-1">Eats</span>
         </div>
@@ -81,19 +83,34 @@ function DashboardNavbar() {
           <ToggleButtons />
         </div>
 
-
-        {/* Address/Search input */}
-        <div className="nav-center flex-1 mx-4">
+        {/* Address Lookup Input */}
+        <div className="nav-center flex-1 mx-4 relative">
           <input
             type="text"
             placeholder="Enter your address"
+            value={address}
+            onChange={handleInputChange}
             className="address-input w-full p-2 rounded-full border border-gray-300"
           />
+          {/* Address Suggestions Dropdown */}
+          {suggestions.length > 0 && (
+            <ul className="absolute left-0 w-full bg-white border border-gray-300 mt-1 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+              {suggestions.map((suggestion) => (
+                <li
+                  key={suggestion.place_id}
+                  className="p-2 cursor-pointer hover:bg-gray-100"
+                  onClick={() => handleSelect(suggestion.display_name)}
+                >
+                  {suggestion.display_name}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* Search input */}
         <div className="nav-center flex-1 mx-4 relative">
-        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             placeholder="Search UberEats"
@@ -103,12 +120,10 @@ function DashboardNavbar() {
 
         {/* Logout button on the main navbar */}
         <ul className="flex gap-6 items-center text-lg font-medium">
-            < FaShoppingCart />
+          <FaShoppingCart />
           <li>
-            <button
-              onClick={handleOrderCart}
-            >
-              
+            <button onClick={handleLogout}>
+              <FaSignOutAlt className="text-xl" />
             </button>
           </li>
         </ul>
@@ -148,46 +163,37 @@ function DashboardNavbar() {
         <ul className="space-y-4">
           <li className="flex items-center py-2 border-b border-gray-200">
             <FaReceipt className="mr-2" />
-            <button onClick={handleOrders} className="hover:text-green-600">
+            <button onClick={() => navigate("/orders")} className="hover:text-green-600">
               Orders
             </button>
           </li>
           <li className="flex items-center py-2 border-b border-gray-200">
             <FaHeart className="mr-2" />
-            <button onClick={handleFavorites} className="hover:text-green-600">
+            <button onClick={() => navigate("/favorites")} className="hover:text-green-600">
               Favorites
             </button>
           </li>
           <li className="flex items-center py-2 border-b border-gray-200">
             <FaUser className="mr-2" />
-            <button onClick={handleProfile} className="hover:text-green-600">
+            <button onClick={() => navigate("/profile")} className="hover:text-green-600">
               Profile
             </button>
           </li>
           <li className="flex items-center py-2 border-b border-gray-200">
             <FaBuilding className="mr-2" />
-            <button
-              onClick={handleRestaurantDashboard}
-              className="hover:text-green-600"
-            >
+            <button onClick={() => navigate("/restaurant/dashboard")} className="hover:text-green-600">
               Create a Business Account
             </button>
           </li>
           <li className="flex items-center py-2 border-b border-gray-200">
             <FaPlusCircle className="mr-2" />
-            <button
-              onClick={handleRestaurantSignup}
-              className="hover:text-green-600"
-            >
+            <button onClick={() => navigate("/restaurant/signup")} className="hover:text-green-600">
               Add your restaurant
             </button>
           </li>
           <li className="flex items-center py-2 border-b border-gray-200">
             <FaMotorcycle className="mr-2" />
-            <button
-              onClick={handleRestaurantSignup}
-              className="hover:text-green-600"
-            >
+            <button onClick={() => navigate("/restaurant/signup")} className="hover:text-green-600">
               Sign up to deliver
             </button>
           </li>
