@@ -10,6 +10,7 @@ import RestaurantLogin from "./pages/RestaurantLogin";
 import RestaurantList from './components/RestaurantList';
 import RestaurantDashboard from './pages/RestaurantDashboard';
 import Profile from "./pages/UserProfile";
+import Orders from "./pages/Orders";
 
 function App() {
     return (
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/restaurant/list" element={<RestaurantList />} />
                 <Route path="/favorites" element={<Favorites />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/orders" element={<Orders />} />
             </Routes>
         </Router>
     );
