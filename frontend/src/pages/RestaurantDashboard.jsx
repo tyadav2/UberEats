@@ -294,7 +294,7 @@ const getOrderCounts = () => {
     orders.forEach(order => {
         if (order.status === "Pending") counts.pending++;
         else if (order.status === "Preparing") counts.preparing++;
-        else if (order.status === "On The Way") counts.onTheWay++;
+        else if (order.status === "On the way") counts.onTheWay++;
         else if (order.status === "Delivered") counts.delivered++;
     });
     
@@ -320,7 +320,7 @@ const getOrderCounts = () => {
         switch(status) {
             case "Pending": return "bg-blue-500";
             case "Preparing": return "bg-yellow-500";
-            case "On The Way": return "bg-purple-500";
+            case "On the way": return "bg-purple-500";
             case "Delivered": return "bg-green-500";
             default: return "bg-gray-500";
         }
@@ -677,7 +677,7 @@ const getOrderCounts = () => {
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                 <h4 className="text-lg font-semibold text-purple-700 mb-2">On The Way</h4>
                 <p className="text-3xl font-bold text-purple-600">
-                    {orders.filter(order => order.status === "On The Way").length}
+                    {orders.filter(order => order.status === "On the way").length}
                 </p>
                 <p className="text-sm text-purple-500 mt-1">Out for delivery</p>
             </div>
@@ -788,9 +788,9 @@ const getOrderCounts = () => {
                         Preparing
                     </button>
                     <button 
-                        onClick={() => updateOrderStatus(orderDetails.id, "On The Way")}
-                        className={`px-3 py-1 text-sm rounded ${orderDetails.status === "On The Way" ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700'}`}
-                        disabled={orderDetails.status === "On The Way"}
+                        onClick={() => updateOrderStatus(orderDetails.id, "On the way")}
+                        className={`px-3 py-1 text-sm rounded ${orderDetails.status === "On the way" ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700'}`}
+                        disabled={orderDetails.status === "On the way"}
                     >
                         On The Way
                     </button>
