@@ -1,13 +1,24 @@
 const express = require("express");
-const { registerUser, loginUser, getUserProfile } = require("../controllers/userController");
+const { registerUser, loginUser, getUserProfile, updateUserProfile } = require("../controllers/userController");
 const { protect } = require("../middleware/authMiddleware");
 const User = require("../models/User");
+const multer = require("multer");
 
 const router = express.Router();
 
 router.post("/signup", registerUser);
 router.post("/login", loginUser);
 
+// Configure Multer Storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/"); // Save uploads to "uploads" folder
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+const upload = multer({ storage });
 
 
 // GET all users
@@ -21,7 +32,11 @@ router.get("/", async (req, res) => {
     }
 });
 
-// ✅ Fix: Use `getUserProfile` instead of `updateProfile`
 router.get("/profile", protect, getUserProfile); 
+
+// PUT user profile + file upload
+router.put("/profile", protect, upload.single("profilePic"), updateUserProfile);
+
+
 
 module.exports = router;
