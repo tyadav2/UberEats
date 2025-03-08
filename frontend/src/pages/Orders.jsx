@@ -11,6 +11,7 @@ function Orders() {
     fetchOrders();
   }, []);
 
+  // Fetch user orders from backend
   const fetchOrders = async () => {
     try {
       const token = JSON.parse(localStorage.getItem("customerToken"));
@@ -29,6 +30,7 @@ function Orders() {
     }
   };
 
+  // Cancel Order
   const handleCancelOrder = async (orderId) => {
     try {
       const token = JSON.parse(localStorage.getItem("customerToken"));
@@ -36,24 +38,26 @@ function Orders() {
         alert("Unauthorized. Please log in.");
         return;
       }
-
+  
       await axios.delete(`http://localhost:5000/api/orders/${orderId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      setOrders(orders.filter(order => order.id !== orderId)); // Remove canceled order from UI
+  
+      // ✅ Remove the canceled order from the UI
+      setOrders((prevOrders) => prevOrders.filter(order => order.id !== orderId));
       alert("Order canceled successfully!");
     } catch (error) {
       console.error("Error canceling order:", error);
       alert("Failed to cancel order.");
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-100">
       <DashboardNavbar />
 
-      <div className="max-w-4xl mt-20 mx-auto p-6 bg-white mt-10 shadow-lg rounded-md">
+      <div className="max-w-4xl mt-20 mx-auto p-6 bg-white shadow-lg rounded-md">
         <h2 className="text-2xl font-bold mb-6">Your Orders</h2>
 
         {/* Orders List */}
@@ -64,15 +68,14 @@ function Orders() {
             {orders.map((order) => (
               <div key={order.id} className="bg-white shadow-lg rounded-lg p-4 border relative">
                 
-                {/* Order Number */}
+                {/* Order Number & Status */}
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-gray-600 text-sm">Order #{order.id}</span>
-                  
-                  {/* Order Status */}
                   <span
                     className={`px-2 py-1 text-xs font-semibold rounded ${
                       order.status === "Preparing" ? "bg-yellow-400 text-white" :
                       order.status === "Delivered" ? "bg-green-500 text-white" :
+                      order.status === "Cancelled" ? "bg-red-500 text-white" :
                       "bg-gray-400 text-white"
                     }`}
                   >
@@ -85,21 +88,27 @@ function Orders() {
                   🍽️ {order.restaurantName}
                 </h3>
 
-                {/* Order Items */}
-                {order.items.map((item, index) => (
-                  <div key={index} className="flex justify-between items-center text-gray-700 text-sm my-1">
-                    <span>{item.name}</span>
-                    <span className="bg-gray-200 px-2 py-1 text-xs rounded-full">x{item.quantity}</span>
-                  </div>
-                ))}
+                {/* Order Items Section */}
+                {Array.isArray(order.items) && order.items.length > 0 ? (
+                  order.items.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center text-gray-700 text-sm my-1">
+                      <span>{item.dishName || `Dish ID: ${item.dishId}`}</span> {/*  Display dish name */}
+                      <span className="bg-gray-200 px-2 py-1 text-xs rounded-full">x{item.quantity}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-sm italic">No items listed</p>
+                )}
+
 
                 {/* Order Total */}
                 <div className="mt-2 text-gray-800 font-semibold">
-                  Total: ${order.total.toFixed(2)}
+                  Total: ${order.totalAmount ? order.totalAmount.toFixed(2) : "0.00"}
                 </div>
 
-                {/* Cancel Order Button (only if allowed) */}
-                {order.status === "Preparing" && (
+                {/* Cancel Order Button (only if order is not Delivered or Cancelled) */}
+                {/* Cancel Order Button (only if order is not Delivered or Cancelled) */}
+                {(order.status === "Preparing" || order.status === "Pending" || order.status === "On the way") && (
                   <button
                     onClick={() => handleCancelOrder(order.id)}
                     className="mt-3 bg-red-500 text-white px-4 py-2 rounded w-full hover:bg-red-600 transition"
