@@ -5,9 +5,10 @@ import Dashboard from "./pages/Dashboard";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Favorites from './pages/Favorites';
-import RestaurantSignup from "./components/RestaurantSignup";
-import RestaurantLogin from "./components/RestaurantLogin";
+import RestaurantSignup from "./pages/RestaurantSignup";
+import RestaurantLogin from "./pages/RestaurantLogin";
 import RestaurantList from './components/RestaurantList';
+import RestaurantDashboard from './pages/RestaurantDashboard';
 import Profile from "./pages/UserProfile";
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/restaurant/signup" element={<RestaurantSignup />} />
                 <Route path="/restaurant/login" element={<RestaurantLogin />} />
+                <Route path ="/restaurant/dashboard" element={<RestaurantDashboard />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/restaurant/list" element={<RestaurantList />} />
                 <Route path="/favorites" element={<Favorites />} />
