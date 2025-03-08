@@ -28,7 +28,7 @@ const RestaurantSignup = () => {
         };
 
         try {
-            const response = await axios.post('http://localhost:5000/api/restaurants/signup', data);
+            const response = await axios.post('http://localhost:5000/api/restaurant/signup', data);
             alert(response.data.message);
             window.location.href = '/restaurant/login'; // Redirect after successful signup
         } catch (error) {
