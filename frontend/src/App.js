@@ -3,15 +3,16 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Signup from "./pages/Signup";
-import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
+import Favorites from './pages/Favorites';
 import RestaurantSignup from "./components/RestaurantSignup";
 import RestaurantLogin from "./components/RestaurantLogin";
+import RestaurantList from './components/RestaurantList';
+import Profile from "./pages/UserProfile";
 
 function App() {
     return (
         <Router>
-            <Navbar />
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
@@ -20,6 +21,9 @@ function App() {
                 <Route path="/restaurant/signup" element={<RestaurantSignup />} />
                 <Route path="/restaurant/login" element={<RestaurantLogin />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/restaurant/list" element={<RestaurantList />} />
+                <Route path="/favorites" element={<Favorites />} />
+                <Route path="/profile" element={<Profile />} />
             </Routes>
         </Router>
     );
