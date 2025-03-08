@@ -46,3 +46,39 @@ exports.getUserProfile = async (req, res) => {
       res.status(500).json({ message: "Error fetching user profile" });
   }
 };
+
+// PUT update user profile
+exports.updateUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // Ensure user is authenticated
+    const { name, city, state, country, phoneNumber, dob } = req.body;
+    let profilePicUrl = null;
+
+    // If profile picture is uploaded, store its URL
+    if (req.file) {
+      profilePicUrl = `/uploads/${req.file.filename}`;
+    }
+
+    // Find user and update
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    await user.update({
+      name: name || user.name,
+      city: city || user.city,
+      state: state || user.state,
+      country: country || user.country,
+      phoneNumber: phoneNumber || user.phoneNumber,
+      dob: dob || user.dob,
+      profilePic: profilePicUrl || user.profilePic,
+    });
+
+    res.json({ message: "Profile updated successfully", user });
+
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

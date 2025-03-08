@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaMapMarkerAlt, FaClock } from "react-icons/fa"; // Importing icons
+import { FaMapMarkerAlt, FaClock } from "react-icons/fa"; 
+import Navbar from '../components/Navbar'; 
 
 function Home() {
   const [address, setAddress] = useState("");
@@ -41,12 +42,14 @@ function Home() {
   };
 
   return (
+    
     <div
       className="h-screen bg-cover bg-center flex flex-col"
       style={{
         backgroundImage: "url('https://www.hodgsonmill.com/cdn/shop/files/pancakes_slider_2882x1322_fe03788b-01c5-4dde-87ff-11cba8b9328f_1200x.jpg?v=1613696401')",
       }}
     >
+      <Navbar />
       <div className="flex-grow flex flex-col justify-center px-8 md:px-20">
         <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
           Order delivery near you
