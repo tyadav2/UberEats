@@ -111,6 +111,23 @@ exports.getDishes = async (req, res) => {
   };
 
   
+exports.getDishesByRestaurantId = async (req, res) => {
+  try {
+      const restaurantId = req.params.restaurantId;
+      console.log("Fetching dishes for restaurant ID:", restaurantId);  // ✅ Debugging log
+
+      const dishes = await Dish.findAll({ where: { restaurantId: restaurantId } });
+      console.log("Dishes found:", dishes);  // ✅ Debugging log
+
+      return res.json(dishes);
+  } catch (error) {
+      console.error("Error fetching dishes:", error);
+      res.status(500).json({ message: "Server error" });
+  }
+};
+  
+
+  
   
   
   
