@@ -37,4 +37,70 @@
   }
 }
 
+/* App.css */
 
+/* Dashboard Container */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The main content below the navbar */
+.dashboard-content {
+  padding: 1rem;
+}
+
+/* Restaurant Grid */
+.restaurant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 1rem;
+}
+
+.restaurant-card {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 12px;
+  background-color: #fff;
+}
+
+.restaurant-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  margin-bottom: 8px;
+}
+
+
+.dashboard-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+}
+
+.nav-left, .nav-center, .nav-right {
+  display: flex;
+  align-items: center;
+}
+
+.dashboard-logo {
+  height: 40px;
+  margin-right: 1rem;
+}
+
+.toggle-buttons button {
+  margin-right: 0.5rem;
+}
+
+.address-input {
+  width: 200px;
+  margin-right: 0.5rem;
+}
+
+.search-btn, .profile-btn {
+  margin-right: 1rem;
+}
