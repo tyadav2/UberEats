@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 function Dashboard() {
   const [restaurants, setRestaurants] = useState([]);
     const [sortedRestaurants, setSortedRestaurants] = useState([]);
-    const [favorites, setFavorites] = useState(new Set()); // ✅ Tracks favorited restaurants
+    //const [favorites, setFavorites] = useState(new Set()); 
     const [sortOrder, setSortOrder] = useState("default");
     const navigate = useNavigate();
 
@@ -19,7 +19,6 @@ function Dashboard() {
 
   useEffect(() => {
     fetchRestaurants();
-    fetchFavorites();
   }, []);
 
   const fetchRestaurants = async () => {
@@ -32,78 +31,6 @@ function Dashboard() {
     }
   };
 
-  // Fetch user's favorites from backend
-  const fetchFavorites = async () => {
-    try {
-      const token = JSON.parse(localStorage.getItem("customerToken")); 
-  
-      if (!token) {
-        console.error("No token found in localStorage");
-        return;
-      }
-  
-      const response = await axios.get("http://localhost:5000/api/favorites", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-  
-      if (!response.data || response.data.length === 0) {
-        setFavorites(new Set()); // ✅ Prevent stale state issues
-        return;
-      }
-  
-      const favoriteSet = new Set(response.data.map((fav) => fav.restaurantId)); 
-      setFavorites(favoriteSet); // ✅ Ensure state updates
-    } catch (error) {
-      console.error("Error fetching favorites:", error);
-    }
-  };
-  
-  
-    // Toggle favorite status
-    const toggleFavorite = async (restaurantId) => {
-        try {
-          const token = JSON.parse(localStorage.getItem("customerToken")); 
-      
-          if (!token) {
-            alert("Unauthorized: Please log in again.");
-            return;
-          }
-      
-          const isFavorite = favorites.has(restaurantId);
-      
-          if (isFavorite) {
-            await axios.delete(`http://localhost:5000/api/favorites/${restaurantId}`, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-      
-            setFavorites(prevFavorites => {
-              const updatedFavorites = new Set(prevFavorites);
-              updatedFavorites.delete(restaurantId);
-              return new Set(updatedFavorites); // ✅ Ensure state updates
-            });
-      
-          } else {
-            await axios.post(
-              "http://localhost:5000/api/favorites",
-              { restaurantId },
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-      
-            setFavorites(prevFavorites => {
-              const updatedFavorites = new Set(prevFavorites);
-              updatedFavorites.add(restaurantId);
-              return new Set(updatedFavorites); // ✅ Ensure state updates
-            });
-          }
-      
-          // ✅ **Re-fetch favorites after updating state**
-          fetchFavorites(); 
-      
-        } catch (error) {
-          console.error("Error updating favorite:", error);
-          alert("Failed to update favorite. Please try again.");
-        }
-      };
       
 
   useEffect(() => {
@@ -217,27 +144,12 @@ function Dashboard() {
       {/* Restaurant Grid */}
 <div className="restaurant-grid p-5 mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
   {sortedRestaurants.map((rest) => (
-    <div key={rest.id} className="relative bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition duration-300 ease-in-out">
-      
-      {/* Favorite Heart Button */}
-        <button 
-        onClick={(e) => {
-            e.stopPropagation();
-            toggleFavorite(rest.id);
-        }}
-        className="absolute top-3 right-3 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
-        aria-label={favorites.has(rest.id) ? "Remove from favorites" : "Add to favorites"}
-        >
-        {favorites.has(rest.id) ? ( // ✅ Now correctly fills heart for already favorited items
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-            </svg>
-        ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-        )}
-        </button>
+    <div 
+    key={rest.id} 
+    className="relative bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition duration-300 ease-in-out"
+    onClick={() => navigate(`/restaurant/${rest.id}`)}
+  >
+  
 
 
       {/* Restaurant Image */}
