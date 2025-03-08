@@ -6,11 +6,13 @@ const RestaurantDashboard = () => {
     const [restaurant, setRestaurant] = useState(null);
     const [activeTab, setActiveTab] = useState("profile");
     const [dishes, setDishes] = useState([]);
+    const [orders, setOrders] = useState([]);
     const [newDish, setNewDish] = useState({ name: "", ingredients: "", price: "", image: null, category: "Appetizer", description: "" });
     const [dishPreview, setDishPreview] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [editingDish, setEditingDish] = useState(null);
     const [confirmDelete, setConfirmDelete] = useState(null);
+    const [orderDetails, setOrderDetails] = useState(null);
 
     const navigate = useNavigate();
     const token = localStorage.getItem("restaurantToken");
@@ -23,6 +25,7 @@ const RestaurantDashboard = () => {
         }
         fetchRestaurantProfile();
         fetchDishes();
+        fetchOrders();
     }, []);
 
     // Fetch restaurant profile
@@ -50,6 +53,83 @@ const RestaurantDashboard = () => {
         } catch (error) {
             console.error("Error fetching dishes:", error);
         }
+    };
+
+    // Fetch dish details
+    const fetchDishDetails = async (dishId) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/dishes/${dishId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching details for dish ${dishId}:`, error);
+            return null;
+        }
+    };
+
+    // Fetch orders
+    const fetchOrders = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/api/orders", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            
+            // Get orders
+            const fetchedOrders = response.data;
+            
+            // Enhance orders with dish details
+            const enhancedOrders = await Promise.all(fetchedOrders.map(async (order) => {
+                // Process each order's items to get full dish details
+                const itemsWithDetails = await Promise.all(order.items.map(async (item) => {
+                    const dishDetails = await fetchDishDetails(item.dishId);
+                    return {
+                        ...item,
+                        dish_name: dishDetails ? dishDetails.name : `Dish #${item.dishId}`,
+                        price: dishDetails ? dishDetails.price : 0,
+                        image: dishDetails ? dishDetails.image : null
+                    };
+                }));
+                
+                // Return order with enhanced items
+                return {
+                    ...order,
+                    items: itemsWithDetails
+                };
+            }));
+            
+            setOrders(enhancedOrders);
+        } catch (error) {
+            console.error("Error fetching orders:", error);
+        }
+    };
+    
+
+    // Update order status
+    const updateOrderStatus = async (orderId, newStatus) => {
+        try {
+            await axios.put(`http://localhost:5000/api/orders/${orderId}/status`, 
+                { status: newStatus },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            fetchOrders(); // Refresh orders after update
+            
+            if (orderDetails && orderDetails.id === orderId) {
+                setOrderDetails({...orderDetails, status: newStatus});
+            }
+            
+            alert(`Order status updated to ${newStatus}`);
+        } catch (error) {
+            console.error("Error updating order status:", error);
+            alert("Failed to update order status!");
+        }
+    };
+
+    // Show order details
+    const showOrderDetails = (order) => {
+        setOrderDetails(order);
     };
 
     // Update restaurant profile
@@ -201,6 +281,51 @@ const RestaurantDashboard = () => {
         return <div className="flex justify-center items-center h-screen text-gray-600 text-lg">Loading...</div>;
     }
 
+    // Get counts for order status types
+    // Update the getOrderCounts function
+const getOrderCounts = () => {
+    const counts = {
+        pending: 0,
+        preparing: 0,
+        onTheWay: 0,
+        delivered: 0
+    };
+    
+    orders.forEach(order => {
+        if (order.status === "Pending") counts.pending++;
+        else if (order.status === "Preparing") counts.preparing++;
+        else if (order.status === "On The Way") counts.onTheWay++;
+        else if (order.status === "Delivered") counts.delivered++;
+    });
+    
+    return counts;
+};
+    
+    const orderCounts = getOrderCounts();
+
+    // Format date
+    const formatDate = (dateString) => {
+        const options = { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    };
+
+    // Get status badge color
+    const getStatusColor = (status) => {
+        switch(status) {
+            case "Pending": return "bg-blue-500";
+            case "Preparing": return "bg-yellow-500";
+            case "On The Way": return "bg-purple-500";
+            case "Delivered": return "bg-green-500";
+            default: return "bg-gray-500";
+        }
+    };
+
     return (
         <div className="flex h-screen bg-gray-100">
             {/* Sidebar Navigation */}
@@ -217,6 +342,12 @@ const RestaurantDashboard = () => {
                     </li>
                     <li className={`cursor-pointer p-3 rounded ${activeTab === "manageDishes" ? "bg-green-600" : ""}`} onClick={() => setActiveTab("manageDishes")}>
                         View / Manage Dishes
+                    </li>
+                    <li className={`cursor-pointer p-3 rounded ${activeTab === "orders" ? "bg-green-600" : ""}`} onClick={() => {
+                        setActiveTab("orders");
+                        setOrderDetails(null);
+                    }}>
+                        Orders {orderCounts.new > 0 && <span className="bg-red-500 text-white rounded-full px-2 py-1 text-xs ml-2">{orderCounts.new} new</span>}
                     </li>
                     <li className="cursor-pointer p-3 rounded bg-red-500 mt-10 text-center" onClick={handleLogout}>
                         Logout
@@ -519,6 +650,193 @@ const RestaurantDashboard = () => {
                         )}
                     </div>
                 )}
+
+                {/* 🆕 Orders Section - List View */}
+                {activeTab === "orders" && !orderDetails && (
+    <div className="bg-white p-6 rounded-lg shadow-lg">
+        <h3 className="text-xl font-semibold mb-6">Manage Orders</h3>
+        
+        {/* Order Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="text-lg font-semibold text-blue-700 mb-2">Pending Orders</h4>
+                <p className="text-3xl font-bold text-blue-600">
+                    {orders.filter(order => order.status === "Pending").length}
+                </p>
+                <p className="text-sm text-blue-500 mt-1">Awaiting processing</p>
+            </div>
+            
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h4 className="text-lg font-semibold text-yellow-700 mb-2">Preparing</h4>
+                <p className="text-3xl font-bold text-yellow-600">
+                    {orders.filter(order => order.status === "Preparing").length}
+                </p>
+                <p className="text-sm text-yellow-500 mt-1">In the kitchen</p>
+            </div>
+            
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <h4 className="text-lg font-semibold text-purple-700 mb-2">On The Way</h4>
+                <p className="text-3xl font-bold text-purple-600">
+                    {orders.filter(order => order.status === "On The Way").length}
+                </p>
+                <p className="text-sm text-purple-500 mt-1">Out for delivery</p>
+            </div>
+            
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h4 className="text-lg font-semibold text-green-700 mb-2">Delivered</h4>
+                <p className="text-3xl font-bold text-green-600">
+                    {orders.filter(order => order.status === "Delivered").length}
+                </p>
+                <p className="text-sm text-green-500 mt-1">Completed orders</p>
+            </div>
+        </div>
+                        
+                        {/* Orders Table */}
+                        {orders.length === 0 ? (
+            <p className="text-gray-500">No orders available yet.</p>
+        ) : (
+            <div className="overflow-x-auto">
+                <table className="min-w-full bg-white border border-gray-200">
+                    <thead>
+                        <tr className="bg-gray-100">
+                            <th className="py-3 px-4 text-left">Order ID</th>
+                            <th className="py-3 px-4 text-left">Customer</th>
+                            <th className="py-3 px-4 text-left">Date & Time</th>
+                            <th className="py-3 px-4 text-left">Total</th>
+                            <th className="py-3 px-4 text-left">Est. Delivery</th>
+                            <th className="py-3 px-4 text-left">Payment</th>
+                            <th className="py-3 px-4 text-left">Status</th>
+                            <th className="py-3 px-4 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {orders.map(order => (
+                            <tr key={order.id} className="border-t border-gray-200 hover:bg-gray-50">
+                                <td className="py-3 px-4">#{order.id}</td>
+                                <td className="py-3 px-4">{order.userEmail}</td>
+                                <td className="py-3 px-4">{formatDate(order.createdAt)}</td>
+                                <td className="py-3 px-4">${parseFloat(order.totalAmount).toFixed(2)}</td>
+                                <td className="py-3 px-4">{order.estimatedDeliveryTime}</td>
+                                <td className="py-3 px-4">{order.paymentMethod}</td>
+                                <td className="py-3 px-4">
+                                    <span className={`inline-block px-3 py-1 text-xs font-semibold text-white rounded-full ${getStatusColor(order.status)}`}>
+                                        {order.status}
+                                    </span>
+                                </td>
+                                <td className="py-3 px-4">
+                                    <button 
+                                        onClick={() => showOrderDetails(order)}
+                                        className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 mr-2"
+                                    >
+                                        Details
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        )}
+    </div>
+)}
+
+                {/* 🆕 Order Details View */}
+                {activeTab === "orders" && orderDetails && (
+    <div className="bg-white p-6 rounded-lg shadow-lg">
+        <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-semibold">Order #{orderDetails.id} Details</h3>
+            <button 
+                onClick={() => setOrderDetails(null)}
+                className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
+            >
+                Back to Orders
+            </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="border rounded-lg p-4">
+                <h4 className="font-semibold text-lg mb-3">Customer Information</h4>
+                <p><span className="font-medium">User ID:</span> {orderDetails.userId}</p>
+                <p><span className="font-medium">Email:</span> {orderDetails.userEmail}</p>
+                <p><span className="font-medium">Order Date:</span> {formatDate(orderDetails.createdAt)}</p>
+                <p><span className="font-medium">Payment Method:</span> {orderDetails.paymentMethod}</p>
+                <p><span className="font-medium">Estimated Delivery:</span> {orderDetails.estimatedDeliveryTime}</p>
+            </div>
+
+            <div className="border rounded-lg p-4">
+                <h4 className="font-semibold text-lg mb-3">Order Status</h4>
+                <div className="mb-4">
+                    <span className={`inline-block px-4 py-2 text-sm font-semibold text-white rounded-md ${getStatusColor(orderDetails.status)}`}>
+                        {orderDetails.status}
+                    </span>
+                </div>
+                
+                <h5 className="font-medium mb-2">Update Status:</h5>
+                <div className="flex flex-wrap gap-2">
+                    <button 
+                        onClick={() => updateOrderStatus(orderDetails.id, "Pending")}
+                        className={`px-3 py-1 text-sm rounded ${orderDetails.status === "Pending" ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'}`}
+                        disabled={orderDetails.status === "Pending"}
+                    >
+                        Pending
+                    </button>
+                    <button 
+                        onClick={() => updateOrderStatus(orderDetails.id, "Preparing")}
+                        className={`px-3 py-1 text-sm rounded ${orderDetails.status === "Preparing" ? 'bg-yellow-600 text-white' : 'bg-yellow-100 text-yellow-700'}`}
+                        disabled={orderDetails.status === "Preparing"}
+                    >
+                        Preparing
+                    </button>
+                    <button 
+                        onClick={() => updateOrderStatus(orderDetails.id, "On The Way")}
+                        className={`px-3 py-1 text-sm rounded ${orderDetails.status === "On The Way" ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700'}`}
+                        disabled={orderDetails.status === "On The Way"}
+                    >
+                        On The Way
+                    </button>
+                    <button 
+                        onClick={() => updateOrderStatus(orderDetails.id, "Delivered")}
+                        className={`px-3 py-1 text-sm rounded ${orderDetails.status === "Delivered" ? 'bg-green-600 text-white' : 'bg-green-100 text-green-700'}`}
+                        disabled={orderDetails.status === "Delivered"}
+                    >
+                        Delivered
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div className="border rounded-lg p-4">
+            <h4 className="font-semibold text-lg mb-3">Order Items</h4>
+            <table className="min-w-full">
+                <thead>
+                    <tr className="bg-gray-50">
+                        <th className="py-2 px-4 text-left">Item</th>
+                        <th className="py-2 px-4 text-right">Quantity</th>
+                        <th className="py-2 px-4 text-right">Price</th>
+                        <th className="py-2 px-4 text-right">Taxes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {orderDetails.items.map((item, index) => (
+                        <tr key={index} className="border-t">
+                            <td className="py-3 px-4">{item.dish_name || `Dish #${item.dishId}`}</td>
+                            <td className="py-3 px-4 text-right">{item.quantity}</td>
+                            <td className="py-3 px-4 text-right">${parseFloat(orderDetails.totalAmount).toFixed(2)}</td>
+                            <td className="py-3 px-4 text-right">No taxes</td>
+                        </tr>
+                    ))}
+                </tbody>
+                <tfoot>
+                    <tr className="border-t font-bold text-lg">
+                        <td colSpan="3" className="py-3 px-4 text-right">Total:</td>
+                        <td className="py-3 px-4 text-right">${parseFloat(orderDetails.totalAmount).toFixed(2)}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+)}
+
             </div>
         </div>
     );
