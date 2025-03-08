@@ -7,13 +7,15 @@ const RestaurantDashboard = () => {
     const [activeTab, setActiveTab] = useState("profile");
     const [dishes, setDishes] = useState([]);
     const [orders, setOrders] = useState([]);
-    const [newDish, setNewDish] = useState({ name: "", description: "", price: "", image_url: "" });
+    const [newDish, setNewDish] = useState({ name: "", ingredients: "", price: "", image: null, category: "Appetizer", description: "" });
+    const [dishPreview, setDishPreview] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [editingDish, setEditingDish] = useState(null);
+    const [confirmDelete, setConfirmDelete] = useState(null);
+    const [orderDetails, setOrderDetails] = useState(null);
 
     const navigate = useNavigate();
-    //const token = localStorage.getItem("restaurantToken");
-    //const token = JSON.parse(localStorage.getItem("restaurantToken")); 
     const token = localStorage.getItem("restaurantToken");
-
 
     useEffect(() => {
         if (!token) {
@@ -33,10 +35,11 @@ const RestaurantDashboard = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setRestaurant(response.data);
+            setImagePreview(response.data.image_url);
         } catch (error) {
-            console.error("Error fetching restaurant profile:", error.response?.data || error.message);
+            console.error("Error fetching restaurant profile:", error);
             alert("Authentication failed! Please log in again.");
-            navigate("/restaurants/login");
+            navigate("/restaurant/login");
         }
     };
 
@@ -52,16 +55,81 @@ const RestaurantDashboard = () => {
         }
     };
 
+    // Fetch dish details
+    const fetchDishDetails = async (dishId) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/dishes/${dishId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching details for dish ${dishId}:`, error);
+            return null;
+        }
+    };
+
     // Fetch orders
     const fetchOrders = async () => {
         try {
             const response = await axios.get("http://localhost:5000/api/orders", {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setOrders(response.data);
+            
+            // Get orders
+            const fetchedOrders = response.data;
+            
+            // Enhance orders with dish details
+            const enhancedOrders = await Promise.all(fetchedOrders.map(async (order) => {
+                // Process each order's items to get full dish details
+                const itemsWithDetails = await Promise.all(order.items.map(async (item) => {
+                    const dishDetails = await fetchDishDetails(item.dishId);
+                    return {
+                        ...item,
+                        dish_name: dishDetails ? dishDetails.name : `Dish #${item.dishId}`,
+                        price: dishDetails ? dishDetails.price : 0,
+                        image: dishDetails ? dishDetails.image : null
+                    };
+                }));
+                
+                // Return order with enhanced items
+                return {
+                    ...order,
+                    items: itemsWithDetails
+                };
+            }));
+            
+            setOrders(enhancedOrders);
         } catch (error) {
             console.error("Error fetching orders:", error);
         }
+    };
+    
+
+    // Update order status
+    const updateOrderStatus = async (orderId, newStatus) => {
+        try {
+            await axios.put(`http://localhost:5000/api/orders/${orderId}/status`, 
+                { status: newStatus },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            fetchOrders(); // Refresh orders after update
+            
+            if (orderDetails && orderDetails.id === orderId) {
+                setOrderDetails({...orderDetails, status: newStatus});
+            }
+            
+            alert(`Order status updated to ${newStatus}`);
+        } catch (error) {
+            console.error("Error updating order status:", error);
+            alert("Failed to update order status!");
+        }
+    };
+
+    // Show order details
+    const showOrderDetails = (order) => {
+        setOrderDetails(order);
     };
 
     // Update restaurant profile
@@ -72,104 +140,703 @@ const RestaurantDashboard = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             alert("Profile updated successfully!");
+            fetchRestaurantProfile();
         } catch (error) {
             console.error("Error updating profile:", error);
             alert("Update failed!");
         }
     };
 
+    // Handle Profile Image Upload
+    const handleProfileImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setRestaurant({ ...restaurant, image_url: file });
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
+    // Handle Dish Image Upload
+    const handleDishImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setNewDish({ ...newDish, image: file });
+            setDishPreview(URL.createObjectURL(file));
+        }
+    };
+
     // Add a new dish
     const handleAddDish = async (e) => {
         e.preventDefault();
+
+        // Create regular JSON object instead of FormData
+        const dishData = {
+            name: newDish.name,
+            ingredients: newDish.ingredients,
+            price: newDish.price,
+            category: newDish.category,
+            description: newDish.description
+        };
+
+        // Handle image: if it's a file, we need to handle it differently
+        if (typeof newDish.image === 'string' && newDish.image.startsWith('http')) {
+            dishData.image = newDish.image;
+        } else if (newDish.image instanceof File) {
+            // If we need file upload, we would need to handle it differently
+            // For now, let's skip this part and rely on image URLs
+            alert("Please use an image URL instead of file upload for now.");
+            return;
+        } else {
+            // If no image is provided, use a placeholder
+            dishData.image = "https://via.placeholder.com/300";
+        }
+
         try {
-            await axios.post("http://localhost:5000/api/dishes", newDish, {
-                headers: { Authorization: `Bearer ${token}` },
+            await axios.post("http://localhost:5000/api/dishes", dishData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json", // Change to JSON instead of FormData
+                },
             });
+
             alert("Dish added successfully!");
-            setNewDish({ name: "", description: "", price: "", image_url: "" });
+            setNewDish({ name: "", ingredients: "", price: "", image: null, category: "Appetizer", description: "" });
+            setDishPreview(null);
             fetchDishes();
         } catch (error) {
             console.error("Error adding dish:", error);
-            alert("Failed to add dish!");
+            if (error.response) {
+                // Log more detailed error information
+                console.error("Response data:", error.response.data);
+                console.error("Response status:", error.response.status);
+                alert(`Failed to add dish: ${error.response.data.message || error.response.statusText}`);
+            } else {
+                alert("Failed to add dish! Check console for details.");
+            }
+        }
+    };
+
+    // Delete a dish
+    const handleDeleteDish = async (dishId) => {
+        try {
+            await axios.delete(`http://localhost:5000/api/dishes/${dishId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            alert("Dish deleted successfully!");
+            fetchDishes();
+            setConfirmDelete(null);
+        } catch (error) {
+            console.error("Error deleting dish:", error);
+            alert("Failed to delete dish!");
+        }
+    };
+
+    // Start editing a dish
+    const startEditDish = (dish) => {
+        setEditingDish({
+            ...dish,
+            ingredients: dish.ingredients || "",
+        });
+        setActiveTab("editDish");
+    };
+
+    // Handle update dish
+    const handleUpdateDish = async (e) => {
+        e.preventDefault();
+        
+        const dishData = {
+            name: editingDish.name,
+            ingredients: editingDish.ingredients,
+            price: editingDish.price,
+            category: editingDish.category,
+            description: editingDish.description,
+            image: editingDish.image
+        };
+
+        try {
+            await axios.put(`http://localhost:5000/api/dishes/${editingDish.id}`, dishData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            
+            alert("Dish updated successfully!");
+            setEditingDish(null);
+            setActiveTab("manageDishes");
+            fetchDishes();
+        } catch (error) {
+            console.error("Error updating dish:", error);
+            alert("Failed to update dish!");
         }
     };
 
     // Logout
     const handleLogout = () => {
         localStorage.removeItem("restaurantToken");
-        navigate("/");
+        navigate("/restaurant/login");
     };
 
     if (!restaurant) {
         return <div className="flex justify-center items-center h-screen text-gray-600 text-lg">Loading...</div>;
     }
 
+    // Get counts for order status types
+    // Update the getOrderCounts function
+const getOrderCounts = () => {
+    const counts = {
+        pending: 0,
+        preparing: 0,
+        onTheWay: 0,
+        delivered: 0
+    };
+    
+    orders.forEach(order => {
+        if (order.status === "Pending") counts.pending++;
+        else if (order.status === "Preparing") counts.preparing++;
+        else if (order.status === "On the way") counts.onTheWay++;
+        else if (order.status === "Delivered") counts.delivered++;
+    });
+    
+    return counts;
+};
+    
+    const orderCounts = getOrderCounts();
+
+    // Format date
+    const formatDate = (dateString) => {
+        const options = { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    };
+
+    // Get status badge color
+    const getStatusColor = (status) => {
+        switch(status) {
+            case "Pending": return "bg-blue-500";
+            case "Preparing": return "bg-yellow-500";
+            case "On the way": return "bg-purple-500";
+            case "Delivered": return "bg-green-500";
+            default: return "bg-gray-500";
+        }
+    };
+
     return (
-        <div className="flex h-screen">
-            {/* Sidebar */}
-            <div className="w-1/4 bg-gray-900 text-white p-6">
-                <h2 className="text-2xl font-bold mb-6">Restaurant Dashboard</h2>
+        <div className="flex h-screen bg-gray-100">
+            {/* Sidebar Navigation */}
+            <div className="w-1/5 bg-gray-900 text-white p-6 fixed h-screen">
+                <h1 className="text-2xl font-bold text-green-400 mb-4">Uber Eats <span className="text-gray-200">for Merchants</span></h1>
+                <h2 className="text-lg font-semibold mb-6">{restaurant.name} - Dashboard</h2>
+
                 <ul className="space-y-4">
-                    <li className={`cursor-pointer p-2 rounded ${activeTab === "profile" ? "bg-green-600" : ""}`} onClick={() => setActiveTab("profile")}>
-                        Profile
+                    <li className={`cursor-pointer p-3 rounded ${activeTab === "profile" ? "bg-green-600" : ""}`} onClick={() => setActiveTab("profile")}>
+                        Profile Management
                     </li>
-                    <li className={`cursor-pointer p-2 rounded ${activeTab === "dishes" ? "bg-green-600" : ""}`} onClick={() => setActiveTab("dishes")}>
-                        Manage Dishes
+                    <li className={`cursor-pointer p-3 rounded ${activeTab === "addDish" ? "bg-green-600" : ""}`} onClick={() => setActiveTab("addDish")}>
+                        Add New Dish
                     </li>
-                    <li className={`cursor-pointer p-2 rounded ${activeTab === "orders" ? "bg-green-600" : ""}`} onClick={() => setActiveTab("orders")}>
-                        Orders
+                    <li className={`cursor-pointer p-3 rounded ${activeTab === "manageDishes" ? "bg-green-600" : ""}`} onClick={() => setActiveTab("manageDishes")}>
+                        View / Manage Dishes
                     </li>
-                    <li className="cursor-pointer p-2 rounded bg-red-500 mt-10 text-center" onClick={handleLogout}>
+                    <li className={`cursor-pointer p-3 rounded ${activeTab === "orders" ? "bg-green-600" : ""}`} onClick={() => {
+                        setActiveTab("orders");
+                        setOrderDetails(null);
+                    }}>
+                        Orders {orderCounts.new > 0 && <span className="bg-red-500 text-white rounded-full px-2 py-1 text-xs ml-2">{orderCounts.new} new</span>}
+                    </li>
+                    <li className="cursor-pointer p-3 rounded bg-red-500 mt-10 text-center" onClick={handleLogout}>
                         Logout
                     </li>
                 </ul>
             </div>
 
             {/* Main Content */}
-            <div className="w-3/4 p-6 overflow-auto">
+            <div className="w-4/5 ml-auto p-6 overflow-auto">
+                {/* ✅ Profile Management Section */}
                 {activeTab === "profile" && (
-                    <div>
-                        <h2 className="text-2xl font-bold mb-4">Restaurant Profile</h2>
+                    <div className="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 className="text-xl font-semibold mb-4">Manage Profile</h3>
                         <form onSubmit={handleProfileUpdate} className="space-y-4">
-                            <input type="text" value={restaurant.name} onChange={(e) => setRestaurant({ ...restaurant, name: e.target.value })} className="w-full p-3 border rounded" required />
-                            <textarea value={restaurant.description} onChange={(e) => setRestaurant({ ...restaurant, description: e.target.value })} className="w-full p-3 border rounded" required />
-                            <button type="submit" className="bg-green-600 text-white p-3 rounded">Update Profile</button>
+                            <input type="text" placeholder="Restaurant Name" value={restaurant.name} onChange={(e) => setRestaurant({ ...restaurant, name: e.target.value })} className="w-full p-3 border rounded" required />
+                            <input type="text" placeholder="Location" value={restaurant.location} onChange={(e) => setRestaurant({ ...restaurant, location: e.target.value })} className="w-full p-3 border rounded" required />
+                            <input type="text" placeholder="Contact Info" value={restaurant.phone_number} onChange={(e) => setRestaurant({ ...restaurant, phone_number: e.target.value })} className="w-full p-3 border rounded" required />
+                            <textarea placeholder="Description" value={restaurant.description} onChange={(e) => setRestaurant({ ...restaurant, description: e.target.value })} className="w-full p-3 border rounded" required />
+
+                            {/* ✅ Profile Image */}
+                            <div className="flex items-center space-x-4">
+                                {imagePreview && (
+                                    <img src={imagePreview} alt="Profile Preview" className="w-24 h-24 rounded-lg border" />
+                                )}
+                                <label className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
+                                    Change Profile Image
+                                    <input type="file" name="profileImage" onChange={handleProfileImageChange} className="hidden" />
+                                </label>
+                            </div>
+
+                            <button type="submit" className="bg-green-600 text-white p-3 rounded w-full">Update Profile</button>
                         </form>
                     </div>
                 )}
 
-                {activeTab === "dishes" && (
-                    <div>
-                        <h2 className="text-2xl font-bold mb-4">Manage Dishes</h2>
-                        <ul className="space-y-4">
-                            {dishes.map((dish) => (
-                                <li key={dish.id} className="p-4 border rounded flex justify-between">
-                                    <span>{dish.name} - ${dish.price}</span>
-                                    <button className="bg-red-500 text-white p-2 rounded">Delete</button>
-                                </li>
-                            ))}
-                        </ul>
-
-                        <h3 className="text-xl font-bold mt-6">Add New Dish</h3>
+                {/* ✅ Add New Dish Section */}
+                {activeTab === "addDish" && (
+                    <div className="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 className="text-xl font-semibold mb-4">Add New Dish</h3>
                         <form onSubmit={handleAddDish} className="space-y-4">
-                            <input type="text" placeholder="Dish Name" value={newDish.name} onChange={(e) => setNewDish({ ...newDish, name: e.target.value })} className="w-full p-3 border rounded" required />
-                            <input type="text" placeholder="Description" value={newDish.description} onChange={(e) => setNewDish({ ...newDish, description: e.target.value })} className="w-full p-3 border rounded" required />
-                            <input type="number" placeholder="Price" value={newDish.price} onChange={(e) => setNewDish({ ...newDish, price: e.target.value })} className="w-full p-3 border rounded" required />
-                            <button type="submit" className="bg-green-600 text-white p-3 rounded">Add Dish</button>
+                            <input 
+                                type="text" 
+                                placeholder="Dish Name" 
+                                value={newDish.name} 
+                                onChange={(e) => setNewDish({ ...newDish, name: e.target.value })} 
+                                className="w-full p-3 border rounded" 
+                                required 
+                            />
+                            
+                            <textarea 
+                                placeholder="Ingredients" 
+                                value={newDish.ingredients} 
+                                onChange={(e) => setNewDish({ ...newDish, ingredients: e.target.value })} 
+                                className="w-full p-3 border rounded" 
+                                required 
+                            />
+                            
+                            <input 
+                                type="number" 
+                                placeholder="Price ($)" 
+                                value={newDish.price} 
+                                onChange={(e) => setNewDish({ ...newDish, price: e.target.value })} 
+                                className="w-full p-3 border rounded" 
+                                min="0.01" 
+                                step="0.01" 
+                                required 
+                            />
+                            
+                            <select 
+                                value={newDish.category} 
+                                onChange={(e) => setNewDish({ ...newDish, category: e.target.value })} 
+                                className="w-full p-3 border rounded" 
+                                required
+                            >
+                                <option value="Appetizer">Appetizer</option>
+                                <option value="Main Course">Main Course</option>
+                                <option value="Dessert">Dessert</option>
+                                <option value="Beverage">Beverage</option>
+                                <option value="Side Dish">Side Dish</option>
+                                <option value="Salad">Salad</option>
+                            </select>
+                            
+                            <textarea 
+                                placeholder="Dish Description" 
+                                value={newDish.description} 
+                                onChange={(e) => setNewDish({ ...newDish, description: e.target.value })} 
+                                className="w-full p-3 border rounded" 
+                                required 
+                            />
+
+                            {/* Image Input - Now with URL option */}
+                            <div className="space-y-4">
+                                <h4 className="font-medium">Dish Image</h4>
+                                
+                                {/* Option to input URL */}
+                                <input 
+                                    type="text" 
+                                    placeholder="Image URL (e.g., https://example.com/image.jpg)" 
+                                    value={typeof newDish.image === 'string' ? newDish.image : ''} 
+                                    onChange={(e) => {
+                                        setNewDish({ ...newDish, image: e.target.value });
+                                        setDishPreview(e.target.value); // Set preview to the URL
+                                    }} 
+                                    className="w-full p-3 border rounded" 
+                                />
+                                
+                                <p className="text-sm text-gray-500">-- OR --</p>
+                                
+                                {/* Option to upload file */}
+                                <div className="flex items-center space-x-4">
+                                    {dishPreview && (
+                                        <img src={dishPreview} alt="Dish Preview" className="w-24 h-24 rounded-lg border object-cover" />
+                                    )}
+                                    <label className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
+                                        Upload Dish Image
+                                        <input type="file" name="dishImage" onChange={handleDishImageChange} className="hidden" accept="image/*" />
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit" className="bg-green-600 text-white p-3 rounded w-full">Add Dish</button>
                         </form>
                     </div>
                 )}
 
-                {activeTab === "orders" && (
-                    <div>
-                        <h2 className="text-2xl font-bold mb-4">Orders</h2>
-                        <ul className="space-y-4">
-                            {orders.map((order) => (
-                                <li key={order.id} className="p-4 border rounded">Order #{order.id} - {order.status}</li>
-                            ))}
-                        </ul>
+                {/* ✅ Edit Dish Section */}
+                {activeTab === "editDish" && editingDish && (
+                    <div className="bg-white p-6 rounded-lg shadow-lg">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-xl font-semibold">Edit Dish</h3>
+                            <button 
+                                onClick={() => {
+                                    setEditingDish(null);
+                                    setActiveTab("manageDishes");
+                                }}
+                                className="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                        <form onSubmit={handleUpdateDish} className="space-y-4">
+                            <input 
+                                type="text" 
+                                placeholder="Dish Name" 
+                                value={editingDish.name} 
+                                onChange={(e) => setEditingDish({ ...editingDish, name: e.target.value })} 
+                                className="w-full p-3 border rounded" 
+                                required 
+                            />
+                            
+                            <textarea 
+                                placeholder="Ingredients (comma separated)" 
+                                value={editingDish.ingredients} 
+                                onChange={(e) => setEditingDish({ ...editingDish, ingredients: e.target.value })} 
+                                className="w-full p-3 border rounded" 
+                                required 
+                            />
+                            
+                            <input 
+                                type="number" 
+                                placeholder="Price ($)" 
+                                value={editingDish.price} 
+                                onChange={(e) => setEditingDish({ ...editingDish, price: e.target.value })} 
+                                className="w-full p-3 border rounded" 
+                                min="0.01" 
+                                step="0.01" 
+                                required 
+                            />
+                            
+                            <select 
+                                value={editingDish.category} 
+                                onChange={(e) => setEditingDish({ ...editingDish, category: e.target.value })} 
+                                className="w-full p-3 border rounded" 
+                                required
+                            >
+                                <option value="Appetizer">Appetizer</option>
+                                <option value="Main Course">Main Course</option>
+                                <option value="Dessert">Dessert</option>
+                                <option value="Beverage">Beverage</option>
+                                <option value="Side Dish">Side Dish</option>
+                                <option value="Salad">Salad</option>
+                            </select>
+                            
+                            <textarea 
+                                placeholder="Dish Description" 
+                                value={editingDish.description} 
+                                onChange={(e) => setEditingDish({ ...editingDish, description: e.target.value })} 
+                                className="w-full p-3 border rounded" 
+                                required 
+                            />
+
+                            {/* Image URL for editing */}
+                            <div className="space-y-4">
+                                <h4 className="font-medium">Dish Image</h4>
+                                
+                                <div className="flex items-center space-x-4 mb-4">
+                                    <img src={editingDish.image} alt={editingDish.name} className="w-24 h-24 rounded-lg border object-cover" />
+                                </div>
+                                
+                                <input 
+                                    type="text" 
+                                    placeholder="Image URL" 
+                                    value={editingDish.image} 
+                                    onChange={(e) => setEditingDish({ ...editingDish, image: e.target.value })} 
+                                    className="w-full p-3 border rounded" 
+                                />
+                            </div>
+
+                            <div className="flex space-x-4">
+                                <button type="submit" className="bg-green-600 text-white p-3 rounded flex-1">Save Changes</button>
+                                <button 
+                                    type="button" 
+                                    onClick={() => {
+                                        setEditingDish(null);
+                                        setActiveTab("manageDishes");
+                                    }}
+                                    className="bg-gray-300 p-3 rounded flex-1"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 )}
+
+                {/* ✅ View / Manage Dishes Section - Enhanced with Edit and Delete capabilities */}
+                {activeTab === "manageDishes" && (
+                    <div className="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 className="text-xl font-semibold mb-4">View / Manage Dishes</h3>
+                        {dishes.length === 0 ? (
+                            <p className="text-gray-500">No dishes available. Add your first dish!</p>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {dishes.map(dish => (
+                                    <div key={dish.id} className="border rounded-lg overflow-hidden shadow-md">
+                                        {/* Confirmation Dialog */}
+                                        {confirmDelete === dish.id && (
+                                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+                                                <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mx-auto">
+                                                    <h4 className="text-lg font-semibold mb-4">Confirm Delete</h4>
+                                                    <p>Are you sure you want to delete "{dish.name}"? This action cannot be undone.</p>
+                                                    <div className="flex space-x-4 mt-6">
+                                                        <button 
+                                                            onClick={() => handleDeleteDish(dish.id)} 
+                                                            className="bg-red-500 text-white px-4 py-2 rounded flex-1"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => setConfirmDelete(null)} 
+                                                            className="bg-gray-300 px-4 py-2 rounded flex-1"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                
+                                        <div className="relative">
+                                            <img 
+                                                src={dish.image} 
+                                                alt={dish.name} 
+                                                className="w-full h-48 object-cover" 
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = "https://via.placeholder.com/300?text=No+Image";
+                                                }}
+                                            />
+                                            <div className="absolute top-2 right-2 flex space-x-2">
+                                                <button 
+                                                    onClick={() => startEditDish(dish)} 
+                                                    className="bg-blue-500 p-2 rounded-full text-white hover:bg-blue-600"
+                                                    title="Edit Dish"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                    </svg>
+                                                </button>
+                                                <button 
+                                                    onClick={() => setConfirmDelete(dish.id)} 
+                                                    className="bg-red-500 p-2 rounded-full text-white hover:bg-red-600"
+                                                    title="Delete Dish"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="p-4">
+                                            <h4 className="font-semibold text-lg">{dish.name}</h4>
+                                            <p className="text-green-600 font-bold">${parseFloat(dish.price).toFixed(2)}</p>
+                                            <p className="text-sm text-gray-600 mb-2">{dish.category}</p>
+                                            <p className="text-sm line-clamp-2 text-gray-700">{dish.description}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* 🆕 Orders Section - List View */}
+                {activeTab === "orders" && !orderDetails && (
+    <div className="bg-white p-6 rounded-lg shadow-lg">
+        <h3 className="text-xl font-semibold mb-6">Manage Orders</h3>
+        
+        {/* Order Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="text-lg font-semibold text-blue-700 mb-2">Pending Orders</h4>
+                <p className="text-3xl font-bold text-blue-600">
+                    {orders.filter(order => order.status === "Pending").length}
+                </p>
+                <p className="text-sm text-blue-500 mt-1">Awaiting processing</p>
+            </div>
+            
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h4 className="text-lg font-semibold text-yellow-700 mb-2">Preparing</h4>
+                <p className="text-3xl font-bold text-yellow-600">
+                    {orders.filter(order => order.status === "Preparing").length}
+                </p>
+                <p className="text-sm text-yellow-500 mt-1">In the kitchen</p>
+            </div>
+            
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <h4 className="text-lg font-semibold text-purple-700 mb-2">On The Way</h4>
+                <p className="text-3xl font-bold text-purple-600">
+                    {orders.filter(order => order.status === "On the way").length}
+                </p>
+                <p className="text-sm text-purple-500 mt-1">Out for delivery</p>
+            </div>
+            
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h4 className="text-lg font-semibold text-green-700 mb-2">Delivered</h4>
+                <p className="text-3xl font-bold text-green-600">
+                    {orders.filter(order => order.status === "Delivered").length}
+                </p>
+                <p className="text-sm text-green-500 mt-1">Completed orders</p>
+            </div>
+        </div>
+                        
+                        {/* Orders Table */}
+                        {orders.length === 0 ? (
+            <p className="text-gray-500">No orders available yet.</p>
+        ) : (
+            <div className="overflow-x-auto">
+                <table className="min-w-full bg-white border border-gray-200">
+                    <thead>
+                        <tr className="bg-gray-100">
+                            <th className="py-3 px-4 text-left">Order ID</th>
+                            <th className="py-3 px-4 text-left">Customer</th>
+                            <th className="py-3 px-4 text-left">Date & Time</th>
+                            <th className="py-3 px-4 text-left">Total</th>
+                            <th className="py-3 px-4 text-left">Est. Delivery</th>
+                            <th className="py-3 px-4 text-left">Payment</th>
+                            <th className="py-3 px-4 text-left">Status</th>
+                            <th className="py-3 px-4 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {orders.map(order => (
+                            <tr key={order.id} className="border-t border-gray-200 hover:bg-gray-50">
+                                <td className="py-3 px-4">#{order.id}</td>
+                                <td className="py-3 px-4">{order.userEmail}</td>
+                                <td className="py-3 px-4">{formatDate(order.createdAt)}</td>
+                                <td className="py-3 px-4">${parseFloat(order.totalAmount).toFixed(2)}</td>
+                                <td className="py-3 px-4">{order.estimatedDeliveryTime}</td>
+                                <td className="py-3 px-4">{order.paymentMethod}</td>
+                                <td className="py-3 px-4">
+                                    <span className={`inline-block px-3 py-1 text-xs font-semibold text-white rounded-full ${getStatusColor(order.status)}`}>
+                                        {order.status}
+                                    </span>
+                                </td>
+                                <td className="py-3 px-4">
+                                    <button 
+                                        onClick={() => showOrderDetails(order)}
+                                        className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 mr-2"
+                                    >
+                                        Details
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        )}
+    </div>
+)}
+
+                {/* 🆕 Order Details View */}
+                {activeTab === "orders" && orderDetails && (
+    <div className="bg-white p-6 rounded-lg shadow-lg">
+        <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-semibold">Order #{orderDetails.id} Details</h3>
+            <button 
+                onClick={() => setOrderDetails(null)}
+                className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
+            >
+                Back to Orders
+            </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="border rounded-lg p-4">
+                <h4 className="font-semibold text-lg mb-3">Customer Information</h4>
+                <p><span className="font-medium">User ID:</span> {orderDetails.userId}</p>
+                <p><span className="font-medium">Email:</span> {orderDetails.userEmail}</p>
+                <p><span className="font-medium">Order Date:</span> {formatDate(orderDetails.createdAt)}</p>
+                <p><span className="font-medium">Payment Method:</span> {orderDetails.paymentMethod}</p>
+                <p><span className="font-medium">Estimated Delivery:</span> {orderDetails.estimatedDeliveryTime}</p>
+            </div>
+
+            <div className="border rounded-lg p-4">
+                <h4 className="font-semibold text-lg mb-3">Order Status</h4>
+                <div className="mb-4">
+                    <span className={`inline-block px-4 py-2 text-sm font-semibold text-white rounded-md ${getStatusColor(orderDetails.status)}`}>
+                        {orderDetails.status}
+                    </span>
+                </div>
+                
+                <h5 className="font-medium mb-2">Update Status:</h5>
+                <div className="flex flex-wrap gap-2">
+                    <button 
+                        onClick={() => updateOrderStatus(orderDetails.id, "Pending")}
+                        className={`px-3 py-1 text-sm rounded ${orderDetails.status === "Pending" ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'}`}
+                        disabled={orderDetails.status === "Pending"}
+                    >
+                        Pending
+                    </button>
+                    <button 
+                        onClick={() => updateOrderStatus(orderDetails.id, "Preparing")}
+                        className={`px-3 py-1 text-sm rounded ${orderDetails.status === "Preparing" ? 'bg-yellow-600 text-white' : 'bg-yellow-100 text-yellow-700'}`}
+                        disabled={orderDetails.status === "Preparing"}
+                    >
+                        Preparing
+                    </button>
+                    <button 
+                        onClick={() => updateOrderStatus(orderDetails.id, "On the way")}
+                        className={`px-3 py-1 text-sm rounded ${orderDetails.status === "On the way" ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700'}`}
+                        disabled={orderDetails.status === "On the way"}
+                    >
+                        On The Way
+                    </button>
+                    <button 
+                        onClick={() => updateOrderStatus(orderDetails.id, "Delivered")}
+                        className={`px-3 py-1 text-sm rounded ${orderDetails.status === "Delivered" ? 'bg-green-600 text-white' : 'bg-green-100 text-green-700'}`}
+                        disabled={orderDetails.status === "Delivered"}
+                    >
+                        Delivered
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div className="border rounded-lg p-4">
+            <h4 className="font-semibold text-lg mb-3">Order Items</h4>
+            <table className="min-w-full">
+                <thead>
+                    <tr className="bg-gray-50">
+                        <th className="py-2 px-4 text-left">Item</th>
+                        <th className="py-2 px-4 text-right">Quantity</th>
+                        <th className="py-2 px-4 text-right">Price</th>
+                        <th className="py-2 px-4 text-right">Taxes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {orderDetails.items.map((item, index) => (
+                        <tr key={index} className="border-t">
+                            <td className="py-3 px-4">{item.dish_name || `Dish #${item.dishId}`}</td>
+                            <td className="py-3 px-4 text-right">{item.quantity}</td>
+                            <td className="py-3 px-4 text-right">${parseFloat(orderDetails.totalAmount).toFixed(2)}</td>
+                            <td className="py-3 px-4 text-right">No taxes</td>
+                        </tr>
+                    ))}
+                </tbody>
+                <tfoot>
+                    <tr className="border-t font-bold text-lg">
+                        <td colSpan="3" className="py-3 px-4 text-right">Total:</td>
+                        <td className="py-3 px-4 text-right">${parseFloat(orderDetails.totalAmount).toFixed(2)}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+)}
+
             </div>
         </div>
     );
