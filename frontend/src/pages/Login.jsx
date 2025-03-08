@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -46,6 +47,7 @@ function Login() {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+      <Navbar />
       {/* Uber Eats Branding */}
       <h1 className="text-4xl font-bold mb-6">
         Uber <span className="text-green-600">Eats</span>
