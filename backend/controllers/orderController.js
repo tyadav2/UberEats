@@ -36,6 +36,28 @@ exports.updateOrderStatus = async (req, res) => {
     }
 };
 
+exports.cancelOrder = async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      const order = await Order.findByPk(orderId);
+  
+      if (!order || order.userId !== req.user.id) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+  
+      if (order.status !== "Preparing") {
+        return res.status(400).json({ message: "Order cannot be canceled" });
+      }
+  
+      await order.update({ status: "Cancelled" });
+  
+      res.json({ message: "Order cancelled successfully" });
+    } catch (error) {
+      console.error("Error canceling order:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  };
+
 exports.getUserOrders = async (req, res) => {
     try {
       // Ensure the requester is a customer
