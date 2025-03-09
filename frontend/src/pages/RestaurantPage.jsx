@@ -10,6 +10,7 @@ const RestaurantPage = () => {
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cart, setCart] = useState([]);
 
   // Function to fetch restaurant details and dishes
   useEffect(() => {
@@ -41,19 +42,52 @@ const RestaurantPage = () => {
     fetchRestaurantAndDishes();
   }, [restaurantId]);
 
+  // Load cart from localStorage on component mount
+  useEffect(() => {
+    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCart(storedCart);
+  }, []);
+
+  // Helper function to update cart in both state and localStorage
+  const updateCart = (newCart) => {
+    setCart(newCart);
+    localStorage.setItem("cart", JSON.stringify(newCart));
+  };
+
   // Function to add items to cart
   const addToCart = (dish) => {
-    const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
-    const existingItemIndex = existingCart.findIndex((item) => item.id === dish.id);
+    const updatedCart = [...cart];
+    const existingItemIndex = updatedCart.findIndex((item) => item.id === dish.id);
 
     if (existingItemIndex >= 0) {
-      existingCart[existingItemIndex].quantity += 1;
+      updatedCart[existingItemIndex].quantity += 1;
     } else {
-      existingCart.push({ ...dish, quantity: 1 });
+      updatedCart.push({ ...dish, quantity: 1 });
     }
 
-    localStorage.setItem("cart", JSON.stringify(existingCart));
-    alert(`${dish.name} added to cart!`);
+    updateCart(updatedCart);
+  };
+
+  // Function to reduce quantity in cart
+  const removeFromCart = (dish) => {
+    const updatedCart = [...cart];
+    const existingItemIndex = updatedCart.findIndex((item) => item.id === dish.id);
+
+    if (existingItemIndex >= 0) {
+      if (updatedCart[existingItemIndex].quantity > 1) {
+        updatedCart[existingItemIndex].quantity -= 1;
+      } else {
+        // Remove item completely if quantity becomes 0
+        updatedCart.splice(existingItemIndex, 1);
+      }
+      updateCart(updatedCart);
+    }
+  };
+
+  // Function to get quantity of item in cart
+  const getItemQuantity = (dishId) => {
+    const item = cart.find(item => item.id === dishId);
+    return item ? item.quantity : 0;
   };
 
   // If loading, show loader
@@ -72,7 +106,7 @@ const RestaurantPage = () => {
             onClick={() => navigate("/cart")}
             className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
           >
-            🛒 Go to Cart
+            🛒 Go to Cart {cart.length > 0 && `(${cart.reduce((sum, item) => sum + item.quantity, 0)})`}
           </button>
         </div>
 
@@ -105,12 +139,32 @@ const RestaurantPage = () => {
                   ${Number(dish.price).toFixed(2)}
                 </p>
 
-                <button
-                  onClick={() => addToCart(dish)}
-                  className="mt-3 bg-blue-500 text-white px-4 py-2 rounded-md w-full hover:bg-blue-600"
-                >
-                  ➕ Add to Cart
-                </button>
+                {getItemQuantity(dish.id) > 0 ? (
+                  <div className="mt-3 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-md p-2">
+                    <button
+                      onClick={() => removeFromCart(dish)}
+                      className="text-blue-700 font-bold text-lg w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-100"
+                    >
+                      -
+                    </button>
+                    <span className="text-blue-800 font-medium">
+                      {getItemQuantity(dish.id)}
+                    </span>
+                    <button
+                      onClick={() => addToCart(dish)}
+                      className="text-blue-700 font-bold text-lg w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-100"
+                    >
+                      +
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => addToCart(dish)}
+                    className="mt-3 bg-blue-500 text-white px-4 py-2 rounded-md w-full hover:bg-blue-600"
+                  >
+                    Add to Cart
+                  </button>
+                )}
               </div>
             ))
           )}
