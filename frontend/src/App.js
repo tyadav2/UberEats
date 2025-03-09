@@ -19,7 +19,7 @@ function App() {
     const [cart, setCart] = useState([]);
 
   const addToCart = (dish) => {
-    setCart((prevCart) => [...prevCart, dish]); //Add dish to cart
+    setCart((prevCart) => [...prevCart, dish]);
   };
     return (
         <Router>
