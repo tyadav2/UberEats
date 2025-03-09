@@ -51,8 +51,8 @@ function UserProfile() {
       setCountry(userData.country || "");
       setPhoneNumber(userData.phoneNumber || "");
       setDob(userData.dob || "");
-      if (userData.profilePicUrl) {
-        setProfilePicUrl(userData.profilePicUrl);
+      if (userData.profilePic) {
+        setProfilePicUrl(userData.profilePic);
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
@@ -210,10 +210,13 @@ function UserProfile() {
       </div>
 
       <div className="max-w-4xl mx-auto p-4 md:p-8">
-        <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-md overflow-hidden mt-12">
           
           {/* Header with profile image */}
-          <div className="bg-black p-6 flex flex-col items-center relative h-64">
+          <div className="p-6  flex flex-col items-center relative h-[300px] bg-cover bg-center"
+                style={{backgroundImage: `url('https://images.prismic.io/next-tryotter/Z135zZbqstJ98gcw_uber-eats-promo-codes-for-existing-users.jpeg?auto=compress,format')`}}
+>
+            
             <div className="absolute bottom-0 translate-y-1/2 bg-white rounded-full p-2 shadow-lg">
               {profilePicUrl ? (
                 <img
