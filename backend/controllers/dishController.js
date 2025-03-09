@@ -120,6 +120,23 @@ exports.getDishesByRestaurantId = async (req, res) => {
       res.status(500).json({ message: "Server error" });
   }
 };
+
+exports.getDishById = async (req, res) => {
+  try {
+    const dishId = req.params.id;
+    const dish = await Dish.findByPk(dishId);
+    
+    if (!dish) {
+      return res.status(404).json({ message: "Dish not found" });
+    }
+    
+    res.json(dish);
+  } catch (error) {
+    console.error("Error fetching dish:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
   
 
   
