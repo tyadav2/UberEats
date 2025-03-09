@@ -5,9 +5,8 @@ const Restaurant = require("../models/Restaurant");
 const protect = async (req, res, next) => {
     let token = req.header("Authorization");
 
-    // Check if token is provided and starts with "Bearer "
     if (token && token.startsWith("Bearer ")) {
-        token = token.split(" ")[1]; // Extract token without "Bearer "
+        token = token.split(" ")[1];
     }
 
     if (!token) {
@@ -19,16 +18,15 @@ const protect = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log("Decoded:", decoded);
 
-        // Check if the token belongs to a User or a Restaurant
         const user = await User.findByPk(decoded.id);
         const restaurant = await Restaurant.findByPk(decoded.id);
 
         if (user) {
-            req.user = user; // Attach user info
+            req.user = user;
             console.log("User found:", user);
         } else if (restaurant) {
             console.log("Restaurant found:", restaurant);
-            req.restaurant = restaurant; // Attach restaurant info
+            req.restaurant = restaurant;
         } else {
             console.log("No matching user or restaurant found");
             return res.status(404).json({ message: "User or Restaurant not found" });
