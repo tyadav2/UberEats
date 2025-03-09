@@ -28,7 +28,7 @@ const CartPage = () => {
     if (newQuantity < 1) return;
 
     const updatedCart = cartItems.map(item =>
-      item._id === itemId ? { ...item, quantity: newQuantity } : item
+      item.id === itemId || item._id === itemId ? { ...item, quantity: newQuantity } : item
     );
 
     setCartItems(updatedCart);
@@ -40,7 +40,7 @@ const CartPage = () => {
   };
 
   const removeItem = (itemId) => {
-    const updatedCart = cartItems.filter(item => item._id !== itemId);
+    const updatedCart = cartItems.filter(item => item.id !== itemId && item._id !== itemId);
     setCartItems(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
 
@@ -72,17 +72,17 @@ const CartPage = () => {
   
       // Ensure prices are numbers and construct valid order items array
       const orderItems = cartItems.map(item => ({
-        dishId: item._id,  // Assuming `_id` is dish identifier
+        dishId: item.id || item._id, 
         name: item.name,
         quantity: item.quantity,
-        price: Number(item.price)  // Ensure price is a number
+        price: Number(item.price)  
       }));
   
       const orderData = {
         restaurantId,
-        totalAmount: Number(totalPrice),  // Convert total to number
+        totalAmount: Number(totalPrice), 
         items: orderItems,
-        paymentMethod: "Credit Card" // You may allow dynamic selection
+        paymentMethod: "Credit Card"
       };
   
       const response = await axios.post("http://localhost:5000/api/orders", orderData, {
@@ -101,7 +101,6 @@ const CartPage = () => {
       alert(`Failed to place order: ${error.response?.data?.message || error.message}`);
     }
   };
-  
 
   return (
     <div className="cart-page">
@@ -116,7 +115,7 @@ const CartPage = () => {
         <>
           <div className="cart-items">
             {cartItems.map(item => (
-              <div key={item._id} className="cart-item flex items-center justify-between bg-white shadow-md rounded-lg p-4 mb-3">
+              <div key={item.id || item._id || Math.random()} className="cart-item flex items-center justify-between bg-white shadow-md rounded-lg p-4 mb-3">
                 {item.image && <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-md" />}
                 
                 <div className="item-details flex-1 px-4">
@@ -126,9 +125,9 @@ const CartPage = () => {
                 </div>
 
                 <div className="item-controls flex items-center">
-                  <button className="bg-gray-300 px-2 rounded" onClick={() => updateQuantity(item._id, item.quantity - 1)}>-</button>
+                  <button className="bg-gray-300 px-2 rounded" onClick={() => updateQuantity(item.id || item._id, item.quantity - 1)}>-</button>
                   <span className="mx-2">{item.quantity}</span>
-                  <button className="bg-gray-300 px-2 rounded" onClick={() => updateQuantity(item._id, item.quantity + 1)}>+</button>
+                  <button className="bg-gray-300 px-2 rounded" onClick={() => updateQuantity(item.id || item._id, item.quantity + 1)}>+</button>
                 </div>
 
                 <div className="item-price text-lg font-bold">
@@ -136,7 +135,7 @@ const CartPage = () => {
                 </div>
 
                 <button 
-                  onClick={() => removeItem(item._id)}
+                  onClick={() => removeItem(item.id || item._id)}
                   className="bg-red-500 text-white px-3 py-1 rounded ml-4"
                 >
                   Remove
