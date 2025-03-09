@@ -15,3 +15,4 @@ backend/migrations/*.js
 backend/config/config.js
 backend/models/index.js
 >>>>>>> Stashed changes
+temp.js
