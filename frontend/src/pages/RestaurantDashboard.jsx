@@ -71,7 +71,7 @@ const RestaurantDashboard = () => {
     // Fetch orders
     const fetchOrders = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/orders", {
+            const response = await axios.get("http://localhost:5000/api/orders/restaurant", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             
@@ -108,7 +108,7 @@ const RestaurantDashboard = () => {
     // Update order status
     const updateOrderStatus = async (orderId, newStatus) => {
         try {
-            await axios.put(`http://localhost:5000/api/orders/${orderId}/status`, 
+            await axios.put(`http://localhost:5000/api/orders/${orderId}`, 
                 { status: newStatus },
                 {
                     headers: { Authorization: `Bearer ${token}` },
