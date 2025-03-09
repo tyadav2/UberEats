@@ -17,15 +17,14 @@ exports.registerRestaurant = async (req, res) => {
         business_hours,
         price_range,
         delivery_time,
-        image_url, // optional field
-        rating,    // optional: will default to 0.0 if not provided
-        is_open    // optional: will default to true if not provided
+        image_url,
+        rating,
+        is_open
     } = req.body;
 
     console.log("Received Signup Data:", req.body);
 
     try {
-        // Ensure all required fields are provided
         if (
             !name ||
             !cuisine ||

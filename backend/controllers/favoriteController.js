@@ -1,18 +1,15 @@
-// controllers/favoriteController.js
 const Favorite = require("../models/Favorite");
 const Restaurant = require("../models/Restaurant");
 
 // Add a restaurant to favorites
 exports.addFavorite = async (req, res) => {
   try {
-    // Ensure that the requester is a customer
     if (!req.user) {
       return res.status(403).json({ message: "Only customers can mark favorites" });
     }
     
     const { restaurantId } = req.body;
     
-    // Validate restaurant existence
     const restaurant = await Restaurant.findByPk(restaurantId);
     if (!restaurant) {
       return res.status(404).json({ message: "Restaurant not found" });
@@ -49,7 +46,6 @@ exports.getFavorites = async (req, res) => {
       where: { userId: req.user.id },
     });
     
-    // Optionally, fetch the full restaurant details for each favorite
     const favoriteRestaurants = await Promise.all(
       favorites.map(async (fav) => {
         const restaurant = await Restaurant.findByPk(fav.restaurantId);

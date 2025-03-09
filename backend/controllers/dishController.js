@@ -1,4 +1,3 @@
-// controllers/dishController.js
 const Dish = require("../models/Dish");
 
 exports.addDish = async (req, res) => {
@@ -35,18 +34,17 @@ exports.updateDish = async (req, res) => {
       const dishId = req.params.id;
       const { name, ingredients, image, price, description, category } = req.body;
       
-      // Find the dish by its primary key
+      // Finding the dish by its primary key
       const dish = await Dish.findByPk(dishId);
       if (!dish) {
         return res.status(404).json({ message: "Dish not found" });
       }
       
-      // Ensure that the dish belongs to the logged-in restaurant
+      // Ensuring that the dish belongs to the logged-in restaurant
       if (dish.restaurantId !== req.restaurant.id) {
         return res.status(403).json({ message: "You are not authorized to update this dish" });
       }
       
-      // Update the dish fields (if provided)
       dish.name = name || dish.name;
       dish.ingredients = ingredients || dish.ingredients;
       dish.image = image || dish.image;
@@ -54,7 +52,6 @@ exports.updateDish = async (req, res) => {
       dish.description = description || dish.description;
       dish.category = category || dish.category;
       
-      // Save the updated dish
       await dish.save();
       
       res.json({ message: "Dish updated successfully", dish });
@@ -73,12 +70,10 @@ exports.updateDish = async (req, res) => {
         return res.status(404).json({ message: "Dish not found" });
       }
       
-      // Check if the dish belongs to the logged-in restaurant
       if (dish.restaurantId !== req.restaurant.id) {
         return res.status(403).json({ message: "You are not authorized to delete this dish" });
       }
       
-      // Delete the dish
       await dish.destroy();
       
       res.json({ message: "Dish deleted successfully" });
@@ -114,10 +109,10 @@ exports.getDishes = async (req, res) => {
 exports.getDishesByRestaurantId = async (req, res) => {
   try {
       const restaurantId = req.params.restaurantId;
-      console.log("Fetching dishes for restaurant ID:", restaurantId);  // ✅ Debugging log
+      console.log("Fetching dishes for restaurant ID:", restaurantId); 
 
       const dishes = await Dish.findAll({ where: { restaurantId: restaurantId } });
-      console.log("Dishes found:", dishes);  // ✅ Debugging log
+      console.log("Dishes found:", dishes);
 
       return res.json(dishes);
   } catch (error) {

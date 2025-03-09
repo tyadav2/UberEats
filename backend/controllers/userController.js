@@ -50,7 +50,7 @@ exports.getUserProfile = async (req, res) => {
 // PUT update user profile
 exports.updateUserProfile = async (req, res) => {
   try {
-    const userId = req.user.id; // Ensure user is authenticated
+    const userId = req.user.id;
     const { name, city, state, country, phoneNumber, dob } = req.body;
     let profilePicUrl = null;
 

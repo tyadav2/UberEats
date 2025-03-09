@@ -2,7 +2,6 @@ const Order = require("../models/Order");
 const Dish = require("../models/Dish");
 const Restaurant = require("../models/Restaurant");
 
-// 🚀 Get Orders for Logged-in Customer
 exports.getUserOrders = async (req, res) => {
     try {
         if (!req.user) {
@@ -18,7 +17,6 @@ exports.getUserOrders = async (req, res) => {
             return res.status(404).json({ message: "No orders found" });
         }
 
-        // ✅ Fetch Dish Names for each order's items
         const enrichedOrders = await Promise.all(
             orders.map(async (order) => {
                 const itemsWithNames = await Promise.all(
@@ -34,7 +32,7 @@ exports.getUserOrders = async (req, res) => {
 
                 return {
                     ...order.toJSON(),
-                    items: itemsWithNames, // ✅ Update items with dish names
+                    items: itemsWithNames, 
                 };
             })
         );
@@ -46,7 +44,6 @@ exports.getUserOrders = async (req, res) => {
     }
 };
 
-// 🚀 Get Orders for a Restaurant
 exports.getRestaurantOrders = async (req, res) => {
     try {
         if (!req.restaurant) {
@@ -72,7 +69,6 @@ exports.getRestaurantOrders = async (req, res) => {
     }
 };
 
-// 🚀 Create a New Order
 exports.createOrder = async (req, res) => {
   try {
     const { restaurantId, totalAmount, items, paymentMethod } = req.body;
@@ -120,7 +116,6 @@ exports.createOrder = async (req, res) => {
 };
 
 
-// 🚀 Update Order Status (Restaurant Only)
 exports.updateOrderStatus = async (req, res) => {
     try {
         if (!req.restaurant) {
@@ -145,7 +140,6 @@ exports.updateOrderStatus = async (req, res) => {
     }
 };
 
-// 🚀 Cancel an Order
 exports.cancelOrder = async (req, res) => {
   try {
       const { orderId } = req.params;
