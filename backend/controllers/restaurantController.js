@@ -167,3 +167,21 @@ exports.updateRestaurantProfile = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+exports.getRestaurantById = async (req, res) => {
+    try {
+        console.log("Fetching restaurant with ID:", req.params.id);  // ✅ Debugging log
+
+        const restaurant = await Restaurant.findByPk(req.params.id);  // ✅ Fix: Use findByPk()
+
+        if (!restaurant) {
+            return res.status(404).json({ message: "Restaurant not found" });
+        }
+
+        res.json(restaurant);
+    } catch (error) {
+        console.error("❌ Error fetching restaurant:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+

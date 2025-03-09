@@ -2,6 +2,7 @@ const Order = require("../models/Order");
 const Dish = require("../models/Dish");
 const Restaurant = require("../models/Restaurant");
 
+// 🚀 Get Orders for Logged-in Customer
 exports.getUserOrders = async (req, res) => {
     try {
         if (!req.user) {
@@ -17,22 +18,24 @@ exports.getUserOrders = async (req, res) => {
             return res.status(404).json({ message: "No orders found" });
         }
 
-        const enrichedOrders = await Promise.all(
-            orders.map(async (order) => {
-                const itemsWithNames = await Promise.all(
-                    order.items.map(async (item) => {
-                        const dish = await Dish.findByPk(item.dishId);
-                        return {
-                            dishId: item.dishId,
-                            dishName: dish ? dish.name : "Unknown Dish",
-                            quantity: item.quantity,
-                        };
-                    })
-                );
+
+                const enrichedOrders = await Promise.all(
+                    orders.map(async (order) => {
+                        const orderData = order.toJSON();
+                        const itemsWithNames = await Promise.all(
+                            orderData.items.map(async (item) => {
+                                const dish = await Dish.findByPk(item.dishId);
+                                return {
+                                    dishId: item.dishId,
+                                    dishName: dish ? dish.name : "Unknown Dish",
+                                    quantity: item.quantity,
+                                };
+                            })
+                        );
 
                 return {
                     ...order.toJSON(),
-                    items: itemsWithNames, 
+                    items: itemsWithNames, // ✅ Update items with dish names
                 };
             })
         );
@@ -44,6 +47,7 @@ exports.getUserOrders = async (req, res) => {
     }
 };
 
+// 🚀 Get Orders for a Restaurant
 exports.getRestaurantOrders = async (req, res) => {
     try {
         if (!req.restaurant) {
@@ -69,6 +73,7 @@ exports.getRestaurantOrders = async (req, res) => {
     }
 };
 
+// 🚀 Create a New Order
 exports.createOrder = async (req, res) => {
   try {
     const { restaurantId, totalAmount, items, paymentMethod } = req.body;
@@ -116,6 +121,7 @@ exports.createOrder = async (req, res) => {
 };
 
 
+// 🚀 Update Order Status (Restaurant Only)
 exports.updateOrderStatus = async (req, res) => {
     try {
         if (!req.restaurant) {
@@ -140,6 +146,7 @@ exports.updateOrderStatus = async (req, res) => {
     }
 };
 
+// 🚀 Cancel an Order
 exports.cancelOrder = async (req, res) => {
   try {
       const { orderId } = req.params;
@@ -160,7 +167,7 @@ exports.cancelOrder = async (req, res) => {
           return res.status(400).json({ message: "Order cannot be canceled once delivered." });
       }
 
-      // Update order status to "Cancelled"
+      // ✅ Update order status to "Cancelled"
       await order.update({ status: "Cancelled" });
 
       res.json({ message: "Order cancelled successfully" });

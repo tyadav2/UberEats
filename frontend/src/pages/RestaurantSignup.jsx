@@ -101,6 +101,12 @@ const RestaurantSignup = () => {
                         <input type="text" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full p-2 border rounded-lg" required />
                     </div>
 
+                    {/* Decription */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Description</label>
+                        <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-2 border rounded-lg" required />
+                    </div>
+
                     {/* Business Hours */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Business Hours</label>

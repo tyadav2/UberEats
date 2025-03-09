@@ -493,7 +493,7 @@ const getOrderCounts = () => {
                             />
                             
                             <textarea 
-                                placeholder="Ingredients (comma separated)" 
+                                placeholder="Ingredients" 
                                 value={editingDish.ingredients} 
                                 onChange={(e) => setEditingDish({ ...editingDish, ingredients: e.target.value })} 
                                 className="w-full p-3 border rounded" 
