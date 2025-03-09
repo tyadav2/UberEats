@@ -4,6 +4,9 @@ const Restaurant = require("../models/Restaurant");
 // Add a restaurant to favorites
 exports.addFavorite = async (req, res) => {
   try {
+    console.log("User making request:", req.user); // Debug log
+    console.log("Restaurant ID received:", req.body.restaurantId); // Debug log
+
     if (!req.user) {
       return res.status(403).json({ message: "Only customers can mark favorites" });
     }
@@ -27,6 +30,8 @@ exports.addFavorite = async (req, res) => {
       userId: req.user.id,
       restaurantId,
     });
+
+    console.log("Successfully added to favorites:", favorite); // Debug log
     
     res.status(201).json({ message: "Restaurant added to favorites", favorite });
   } catch (error) {
@@ -34,6 +39,7 @@ exports.addFavorite = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 // Get a customer's favorite restaurants
 exports.getFavorites = async (req, res) => {
