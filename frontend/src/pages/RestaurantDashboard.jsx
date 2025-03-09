@@ -85,7 +85,7 @@ const RestaurantDashboard = () => {
                     const dishDetails = await fetchDishDetails(item.dishId);
                     return {
                         ...item,
-                        dish_name: dishDetails ? dishDetails.name : `Dish #${item.dishId}`,
+                        dishName: dishDetails ? dishDetails.name : `Dish #${item.dishId}`,
                         price: dishDetails ? dishDetails.price : 0,
                         image: dishDetails ? dishDetails.image : null
                     };
@@ -806,7 +806,7 @@ const getOrderCounts = () => {
                 <tbody>
                     {orderDetails.items.map((item, index) => (
                         <tr key={index} className="border-t">
-                            <td className="py-3 px-4">{item.dish_name || `Dish #${item.dishId}`}</td>
+                            <td className="py-3 px-4">{item.dishName || `Dish #${item.dishId}`}</td>
                             <td className="py-3 px-4 text-right">{item.quantity}</td>
                             <td className="py-3 px-4 text-right">${parseFloat(orderDetails.totalAmount).toFixed(2)}</td>
                             <td className="py-3 px-4 text-right">No taxes</td>
