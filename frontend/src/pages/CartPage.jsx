@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import DashboardNavbar from '../components/DashboardNavbar';
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [deliveryFee, setDeliveryFee] = useState(0);
+  const [isPickup, setIsPickup] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +27,12 @@ const CartPage = () => {
     // Calculate total price
     const total = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     setTotalPrice(total);
+    
+    // Generate random delivery fee between $1 and $5
+    if (items.length > 0) {
+      const randomFee = (Math.random() * 4 + 1).toFixed(2);
+      setDeliveryFee(parseFloat(randomFee));
+    }
   }, []);
 
   const updateQuantity = (itemId, newQuantity) => {
@@ -47,6 +58,45 @@ const CartPage = () => {
     // Recalculate total price
     const newTotal = updatedCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     setTotalPrice(newTotal);
+    
+    // If cart becomes empty, reset delivery fee
+    if (updatedCart.length === 0) {
+      setDeliveryFee(0);
+    }
+  };
+
+  // Address Lookup Feature
+  const handleAddressInput = async (e) => {
+    const query = e.target.value;
+    setDeliveryAddress(query);
+
+    if (query.length > 2) {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${query}`,
+          {
+            headers: {
+              "User-Agent": "UberEatsClone/1.0 (contact: adi.tekale99@gmail.com)",
+              "Accept-Language": "en",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch address suggestions");
+        }
+
+        const data = await response.json();
+        setSuggestions(data);
+      } catch (error) {
+        console.error("Address fetch error:", error);
+      }
+    }
+  };
+
+  const handleSelectAddress = (selectedAddress) => {
+    setDeliveryAddress(selectedAddress);
+    setSuggestions([]);
   };
 
   const placeOrder = async () => {
@@ -59,6 +109,12 @@ const CartPage = () => {
   
       if (cartItems.length === 0) {
         alert("Your cart is empty!");
+        return;
+      }
+  
+      // Check if delivery address is provided when not pickup
+      if (!isPickup && !deliveryAddress.trim()) {
+        alert("Please provide a delivery address.");
         return;
       }
   
@@ -78,11 +134,16 @@ const CartPage = () => {
         price: Number(item.price)  
       }));
   
+      const finalTotal = isPickup ? Number(totalPrice) : Number(totalPrice) + Number(deliveryFee);
+      
       const orderData = {
         restaurantId,
-        totalAmount: Number(totalPrice), 
+        totalAmount: finalTotal, 
         items: orderItems,
-        paymentMethod: "Credit Card"
+        paymentMethod: "Credit Card",
+        isPickup: isPickup,
+        deliveryAddress: isPickup ? null : deliveryAddress,
+        deliveryFee: isPickup ? 0 : deliveryFee
       };
   
       const response = await axios.post("http://localhost:5000/api/orders", orderData, {
@@ -93,6 +154,7 @@ const CartPage = () => {
       localStorage.removeItem("cart");
       setCartItems([]);
       setTotalPrice(0);
+      setDeliveryFee(0);
   
       alert("Order placed successfully!");
       navigate("/orders");
@@ -104,61 +166,124 @@ const CartPage = () => {
 
   return (
     <div className="cart-page">
-      <h1 className="text-2xl font-bold mb-4">Your Cart</h1>
+      <DashboardNavbar />
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold mb-6 p-10">Your Cart</h1>
 
-      {cartItems.length === 0 ? (
-        <div className="empty-cart">
-          <p>Your cart is empty</p>
-          <Link to="/dashboard" className="text-blue-500 underline">Browse Restaurants</Link>
-        </div>
-      ) : (
-        <>
-          <div className="cart-items">
-            {cartItems.map(item => (
-              <div key={item.id || item._id || Math.random()} className="cart-item flex items-center justify-between bg-white shadow-md rounded-lg p-4 mb-3">
-                {item.image && <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-md" />}
-                
-                <div className="item-details flex-1 px-4">
-                  <h3 className="font-semibold">{item.name}</h3>
-                  <p className="text-gray-500 text-sm">{item.description}</p>
-                  <p className="text-green-600 font-semibold">${Number(item.price).toFixed(2)} each</p>
-                </div>
-
-                <div className="item-controls flex items-center">
-                  <button className="bg-gray-300 px-2 rounded" onClick={() => updateQuantity(item.id || item._id, item.quantity - 1)}>-</button>
-                  <span className="mx-2">{item.quantity}</span>
-                  <button className="bg-gray-300 px-2 rounded" onClick={() => updateQuantity(item.id || item._id, item.quantity + 1)}>+</button>
-                </div>
-
-                <div className="item-price text-lg font-bold">
-                  ${(Number(item.price) * item.quantity).toFixed(2)}
-                </div>
-
-                <button 
-                  onClick={() => removeItem(item.id || item._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded ml-4"
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
+        {cartItems.length === 0 ? (
+          <div className="empty-cart text-center py-8">
+            <p className="text-gray-600 mb-4">Your cart is empty</p>
+            <Link to="/dashboard" className="text-blue-500 hover:text-blue-700 underline">Browse Restaurants</Link>
           </div>
-
-          <div className="cart-summary mt-6 p-4 bg-gray-100 rounded-lg">
-            <h2 className="text-xl font-bold mb-2">Order Summary</h2>
-            <div className="flex justify-between text-lg font-semibold">
-              <span>Total:</span>
-              <span>${totalPrice.toFixed(2)}</span>
+        ) : (
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Cart Items - THIS SECTION WAS MISSING */}
+            <div className="cart-items md:w-2/3">
+              {cartItems.map((item) => (
+                <div key={item.id || item._id} className="cart-item bg-white p-4 rounded-lg shadow-md mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                  <div className="item-details flex-1 mb-3 sm:mb-0">
+                    <h3 className="text-lg font-semibold">{item.name}</h3>
+                    <p className="text-gray-700">${item.price.toFixed(2)}</p>
+                  </div>
+                  
+                  <div className="item-actions flex items-center">
+                    <div className="quantity-controls flex items-center mr-4">
+                      <button 
+                        onClick={() => updateQuantity(item.id || item._id, item.quantity - 1)}
+                        className="bg-gray-200 px-2 py-1 rounded-l text-lg font-bold"
+                      >
+                        -
+                      </button>
+                      <span className="px-3 py-1 bg-gray-100">{item.quantity}</span>
+                      <button 
+                        onClick={() => updateQuantity(item.id || item._id, item.quantity + 1)}
+                        className="bg-gray-200 px-2 py-1 rounded-r text-lg font-bold"
+                      >
+                        +
+                      </button>
+                    </div>
+                    
+                    <button 
+                      onClick={() => removeItem(item.id || item._id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-            <button 
-              onClick={placeOrder}
-              className="bg-green-500 text-white px-4 py-2 mt-4 rounded w-full hover:bg-green-600 transition"
-            >
-              Place Order
-            </button>
+            
+            {/* Order Summary */}
+            <div className="cart-summary md:w-1/3 bg-white p-6 shadow-lg rounded-lg h-fit">
+              <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+              
+              <div className="price-details mb-4">
+                <div className="flex justify-between mb-2">
+                  <span>Subtotal:</span>
+                  <span>${totalPrice.toFixed(2)}</span>
+                </div>
+                {!isPickup && (
+                  <div className="flex justify-between mb-2">
+                    <span>Delivery Fee:</span>
+                    <span>${deliveryFee.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
+                  <span>Total:</span>
+                  <span>${(isPickup ? totalPrice : totalPrice + deliveryFee).toFixed(2)}</span>
+                </div>
+              </div>
+              
+              <div className="delivery-options mb-4">
+                <div className="flex items-center mb-2">
+                  <input 
+                    type="checkbox" 
+                    id="pickup" 
+                    className="mr-2 h-4 w-4" 
+                    checked={isPickup}
+                    onChange={() => setIsPickup(!isPickup)}
+                  />
+                  <label htmlFor="pickup" className="text-lg">Pickup instead of delivery</label>
+                </div>
+                
+                {!isPickup && (
+                  <div className="mt-3">
+                    <label htmlFor="address" className="block text-gray-700 mb-2">Delivery Address:</label>
+                    <input
+                      id="address"
+                      className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={deliveryAddress}
+                      onChange={handleAddressInput}
+                      placeholder="Enter your delivery address"
+                    />
+                    {suggestions.length > 0 && (
+                      <ul className="bg-white shadow-md mt-1 rounded max-h-40 overflow-y-auto">
+                        {suggestions.map((suggestion, index) => (
+                          <li 
+                            key={index} 
+                            className="p-2 cursor-pointer hover:bg-gray-200"
+                            onClick={() => handleSelectAddress(suggestion.display_name)}
+                          >
+                            {suggestion.display_name}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <button 
+                onClick={placeOrder}
+                className="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg w-full font-bold text-lg transition"
+              >
+                {isPickup ? 'Place Pickup Order' : 'Place Delivery Order'}
+              </button>
+            </div>
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 };
