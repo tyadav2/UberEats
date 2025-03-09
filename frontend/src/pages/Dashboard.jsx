@@ -4,21 +4,20 @@ import Slider from 'react-slick';
 import DashboardNavbar from '../components/DashboardNavbar';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaHeart, FaRegHeart } from 'react-icons/fa';
 import '../App.css';
 import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
   const [restaurants, setRestaurants] = useState([]);
-    const [sortedRestaurants, setSortedRestaurants] = useState([]);
-    //const [favorites, setFavorites] = useState(new Set()); 
-    const [sortOrder, setSortOrder] = useState("default");
-    const navigate = useNavigate();
-
-
+  const [sortedRestaurants, setSortedRestaurants] = useState([]);
+  const [favorites, setFavorites] = useState(new Set()); 
+  const [sortOrder, setSortOrder] = useState("default");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchRestaurants();
+    fetchFavorites();
   }, []);
 
   const fetchRestaurants = async () => {
@@ -31,7 +30,63 @@ function Dashboard() {
     }
   };
 
-      
+  const fetchFavorites = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/favorites', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      // Create a Set of restaurant IDs that are favorited
+      const favIds = new Set(response.data.map(restaurant => restaurant.id));
+      setFavorites(favIds);
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+    }
+  };
+
+  const toggleFavorite = async (e, restaurantId) => {
+    e.stopPropagation(); // Prevent navigation to restaurant details
+    
+    try {
+      if (favorites.has(restaurantId)) {
+        // Remove from favorites
+        await axios.delete(`http://localhost:5000/api/favorites/${restaurantId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        setFavorites(prev => {
+          const newFavorites = new Set(prev);
+          newFavorites.delete(restaurantId);
+          return newFavorites;
+        });
+      } else {
+        // Add to favorites
+        await axios.post('http://localhost:5000/api/favorites', 
+          { restaurantId },
+          { 
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
+        
+        setFavorites(prev => {
+          const newFavorites = new Set(prev);
+          newFavorites.add(restaurantId);
+          return newFavorites;
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      // If unauthorized, redirect to login
+      if (error.response && error.response.status === 401) {
+        navigate('/login');
+      }
+    }
+  };
 
   useEffect(() => {
     if (sortOrder === 'asc') {
@@ -81,7 +136,6 @@ function Dashboard() {
     </button>
   );
   
-
   // Carousel settings
   const sliderSettings = {
     dots: false,
@@ -138,41 +192,50 @@ function Dashboard() {
         </button>
       </div>
         
-        <h1 className="text-2xl font-semibold mb-4 p-5">Featured on Uber Eats</h1>
+      <h1 className="text-2xl font-semibold mb-4 p-5">Featured on Uber Eats</h1>
       
       {/* Restaurant Grid */}
-<div className="restaurant-grid p-5 mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-  {sortedRestaurants.map((rest) => (
-    <div 
-    key={rest.id} 
-    className="relative bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition duration-300 ease-in-out"
-    onClick={() => navigate(`/restaurants/${rest.id}`)}
-  >
-  
+      <div className="restaurant-grid p-5 mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {sortedRestaurants.map((rest) => (
+          <div 
+            key={rest.id} 
+            className="relative bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition duration-300 ease-in-out"
+            onClick={() => navigate(`/restaurants/${rest.id}`)}
+          >
+            {/* Restaurant Image */}
+            <div className="relative w-full h-44">
+              <img
+                src={rest.image_url || 'https://via.placeholder.com/300'}
+                alt={rest.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
 
+            {/* Favorite Heart Icon */}
+            <div 
+              className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-md z-10 cursor-pointer"
+              onClick={(e) => toggleFavorite(e, rest.id)}
+            >
+              {favorites.has(rest.id) ? (
+                <FaHeart className="text-red-500 text-xl" />
+              ) : (
+                <FaRegHeart className="text-gray-500 text-xl hover:text-red-500" />
+              )}
+            </div>
 
-      {/* Restaurant Image */}
-      <div className="relative w-full h-44">
-        <img
-          src={rest.image_url || 'https://via.placeholder.com/300'}
-          alt={rest.name}
-          className="w-full h-full object-cover"
-        />
+            {/* Rating Badge */}
+            <div className="absolute bottom-3 right-3 bg-white text-black font-semibold px-3 py-1 rounded-full shadow-md">
+              {rest.rating}
+            </div>
+
+            {/* Restaurant Details */}
+            <div className="p-4">
+              <h3 className="text-lg font-semibold">{rest.name}</h3>
+              <p className="text-gray-500 text-sm">{rest.category}</p>
+            </div>
+          </div>
+        ))}
       </div>
-
-      {/* Rating Badge */}
-      <div className="absolute bottom-3 right-3 bg-white text-black font-semibold px-3 py-1 rounded-full shadow-md">
-        {rest.rating}
-      </div>
-
-      {/* Restaurant Details */}
-      <div className="p-4">
-        <h3 className="text-lg font-semibold">{rest.name}</h3>
-        <p className="text-gray-500 text-sm">{rest.category}</p>
-      </div>
-    </div>
-  ))}
-</div>
     </div>
   );
 }
