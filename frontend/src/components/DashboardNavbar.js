@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ToggleButtons from "./ToggleButtons.js";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
   FaReceipt,
   FaHeart,
@@ -57,12 +59,29 @@ function DashboardNavbar() {
   };
 
   const handleLogout = () => {
-    navigate("/");
-    setIsOpen(false);
+    toast.success('Successfully logged out!', {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true
+    });
+    
+    setTimeout(() => {
+      navigate("/login");
+      setIsOpen(false);
+    }, 2000);
+  };
+  
+
+  const handleCartClick = () => {
+    navigate("/cart");
   };
 
   return (
     <>
+    <ToastContainer />
       {/* Navbar */}
       <nav className="main-navbar absolute top-0 left-0 w-full flex justify-between items-center p-4 bg-transparent z-10">
         {/* Hamburger Button */}
@@ -82,31 +101,30 @@ function DashboardNavbar() {
         <div className="ml-6">
           <ToggleButtons />
         </div>
-
         {/* Address Lookup Input */}
-        <div className="nav-center flex-1 mx-4 relative">
-          <input
-            type="text"
-            placeholder="Enter your address"
-            value={address}
-            onChange={handleInputChange}
-            className="address-input w-full p-2 rounded-full border border-gray-300"
-          />
-          {/* Address Suggestions Dropdown */}
-          {suggestions.length > 0 && (
-            <ul className="absolute left-0 w-full bg-white border border-gray-300 mt-1 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-              {suggestions.map((suggestion) => (
-                <li
-                  key={suggestion.place_id}
-                  className="p-2 cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSelect(suggestion.display_name)}
-                >
-                  {suggestion.display_name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+<div className="nav-center flex-1 mx-4 relative">
+  <input
+    type="text"
+    placeholder="Enter your address"
+    value={address}
+    onChange={handleInputChange}
+    className="address-input w-full p-2 rounded-full border border-gray-300 relative z-20"
+  />
+  {/* Address Suggestions Dropdown */}
+  {suggestions.length > 0 && (
+    <ul className="absolute left-0 right-0 w-full bg-white border border-gray-300 mt-20 rounded-lg shadow-lg max-h-40 overflow-y-auto z-50">
+      {suggestions.map((suggestion) => (
+        <li
+          key={suggestion.place_id}
+          className="p-2 cursor-pointer hover:bg-gray-100"
+          onClick={() => handleSelect(suggestion.display_name)}
+        >
+          {suggestion.display_name}
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
 
         {/* Search input */}
         <div className="nav-center flex-1 mx-4 relative">
@@ -118,15 +136,19 @@ function DashboardNavbar() {
           />
         </div>
 
-        {/* Logout button on the main navbar */}
-        <ul className="flex gap-6 items-center text-lg font-medium">
-          <FaShoppingCart />
-          <li>
-            <button onClick={handleLogout}>
-              <FaSignOutAlt className="text-xl" />
-            </button>
-          </li>
-        </ul>
+      {/* Logout button on the main navbar */}
+      <ul className="flex gap-6 items-center text-lg font-medium">
+        <li>
+          <button onClick={handleCartClick}>
+            <FaShoppingCart />
+          </button>
+        </li>
+        <li>
+          <button onClick={handleLogout}>
+            <FaSignOutAlt className="text-xl" />
+          </button>
+        </li>
+      </ul>
       </nav>
 
       {/* Sidebar Background Overlay */}
