@@ -17,6 +17,7 @@ const RestaurantDashboard = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem("restaurantToken");
 
+
     useEffect(() => {
         if (!token) {
             console.error("No token found! Redirecting to login.");
