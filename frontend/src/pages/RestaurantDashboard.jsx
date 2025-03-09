@@ -430,13 +430,7 @@ const getOrderCounts = () => {
                                 <option value="Salad">Salad</option>
                             </select>
                             
-                            <textarea 
-                                placeholder="Dish Description" 
-                                value={newDish.description} 
-                                onChange={(e) => setNewDish({ ...newDish, description: e.target.value })} 
-                                className="w-full p-3 border rounded" 
-                                required 
-                            />
+                           
 
                             {/* Image Input - Now with URL option */}
                             <div className="space-y-4">
