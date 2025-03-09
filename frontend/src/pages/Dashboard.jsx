@@ -20,6 +20,8 @@ function Dashboard() {
     fetchFavorites();
   }, []);
 
+  const token = JSON.parse(localStorage.getItem("customerToken"));
+
   const fetchRestaurants = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/restaurants');
@@ -34,7 +36,7 @@ function Dashboard() {
     try {
       const response = await axios.get('http://localhost:5000/api/favorites', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${token}`
         }
       });
       // Create a Set of restaurant IDs that are favorited
@@ -53,7 +55,7 @@ function Dashboard() {
         // Remove from favorites
         await axios.delete(`http://localhost:5000/api/favorites/${restaurantId}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${token}`
           }
         });
         
@@ -68,7 +70,7 @@ function Dashboard() {
           { restaurantId },
           { 
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
+              Authorization: `Bearer ${token}`
             }
           }
         );
