@@ -14,8 +14,8 @@ function UserProfile() {
   const [country, setCountry] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [dob, setDob] = useState("");
-  const [profilePic, setProfilePic] = useState(null); // File input
-  const [profilePicUrl, setProfilePicUrl] = useState(""); // Profile picture preview
+  const [profilePic, setProfilePic] = useState(null);
+  const [profilePicUrl, setProfilePicUrl] = useState("");
 
   useEffect(() => {
     fetchUserProfile();
@@ -24,7 +24,7 @@ function UserProfile() {
   // Fetch user profile
   const fetchUserProfile = async () => {
     try {
-      const token = JSON.parse(localStorage.getItem("customerToken")); // Fix applied here
+      const token = JSON.parse(localStorage.getItem("customerToken"));
 
       if (!token) {
         console.error("No token found in localStorage");
@@ -64,7 +64,7 @@ function UserProfile() {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      const token = JSON.parse(localStorage.getItem("customerToken")); // ✅ Fix applied
+      const token = JSON.parse(localStorage.getItem("customerToken"));
   
       if (!token) {
         alert("Unauthorized: Please log in again.");

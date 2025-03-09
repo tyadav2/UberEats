@@ -16,8 +16,8 @@ function CartPage({ cart, setCart }) {
       );
 
       alert("Order placed successfully!");
-      setCart([]); // Clear cart after order
-      navigate("/orders"); // Redirect to orders page
+      setCart([]);
+      navigate("/orders");
     } catch (error) {
       console.error("Error placing order:", error);
       alert("Failed to place order.");

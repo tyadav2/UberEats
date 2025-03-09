@@ -195,7 +195,7 @@ const RestaurantDashboard = () => {
             await axios.post("http://localhost:5000/api/dishes", dishData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json", // Change to JSON instead of FormData
+                    "Content-Type": "application/json",
                 },
             });
 
@@ -357,7 +357,7 @@ const getOrderCounts = () => {
 
             {/* Main Content */}
             <div className="w-4/5 ml-auto p-6 overflow-auto">
-                {/* ✅ Profile Management Section */}
+                {/* Profile Management Section */}
                 {activeTab === "profile" && (
                     <div className="bg-white p-6 rounded-lg shadow-lg">
                         <h3 className="text-xl font-semibold mb-4">Manage Profile</h3>
@@ -367,7 +367,7 @@ const getOrderCounts = () => {
                             <input type="text" placeholder="Contact Info" value={restaurant.phone_number} onChange={(e) => setRestaurant({ ...restaurant, phone_number: e.target.value })} className="w-full p-3 border rounded" required />
                             <textarea placeholder="Description" value={restaurant.description} onChange={(e) => setRestaurant({ ...restaurant, description: e.target.value })} className="w-full p-3 border rounded" required />
 
-                            {/* ✅ Profile Image */}
+                            {/* Profile Image */}
                             <div className="flex items-center space-x-4">
                                 {imagePreview && (
                                     <img src={imagePreview} alt="Profile Preview" className="w-24 h-24 rounded-lg border" />
@@ -383,7 +383,7 @@ const getOrderCounts = () => {
                     </div>
                 )}
 
-                {/* ✅ Add New Dish Section */}
+                {/* Add New Dish Section */}
                 {activeTab === "addDish" && (
                     <div className="bg-white p-6 rounded-lg shadow-lg">
                         <h3 className="text-xl font-semibold mb-4">Add New Dish</h3>
@@ -443,7 +443,7 @@ const getOrderCounts = () => {
                                     value={typeof newDish.image === 'string' ? newDish.image : ''} 
                                     onChange={(e) => {
                                         setNewDish({ ...newDish, image: e.target.value });
-                                        setDishPreview(e.target.value); // Set preview to the URL
+                                        setDishPreview(e.target.value);
                                     }} 
                                     className="w-full p-3 border rounded" 
                                 />
@@ -467,7 +467,7 @@ const getOrderCounts = () => {
                     </div>
                 )}
 
-                {/* ✅ Edit Dish Section */}
+                {/* Edit Dish Section */}
                 {activeTab === "editDish" && editingDish && (
                     <div className="bg-white p-6 rounded-lg shadow-lg">
                         <div className="flex justify-between items-center mb-4">
@@ -560,7 +560,7 @@ const getOrderCounts = () => {
                     </div>
                 )}
 
-                {/* ✅ View / Manage Dishes Section - Enhanced with Edit and Delete capabilities */}
+                {/* View / Manage Dishes Section - Enhanced with Edit and Delete capabilities */}
                 {activeTab === "manageDishes" && (
                     <div className="bg-white p-6 rounded-lg shadow-lg">
                         <h3 className="text-xl font-semibold mb-4">View / Manage Dishes</h3>
@@ -638,7 +638,7 @@ const getOrderCounts = () => {
                     </div>
                 )}
 
-                {/* 🆕 Orders Section - List View */}
+                {/* Orders Section - List View */}
                 {activeTab === "orders" && !orderDetails && (
     <div className="bg-white p-6 rounded-lg shadow-lg">
         <h3 className="text-xl font-semibold mb-6">Manage Orders</h3>
@@ -727,7 +727,7 @@ const getOrderCounts = () => {
     </div>
 )}
 
-                {/* 🆕 Order Details View */}
+                {/* Order Details View */}
                 {activeTab === "orders" && orderDetails && (
     <div className="bg-white p-6 rounded-lg shadow-lg">
         <div className="flex justify-between items-center mb-6">

@@ -33,7 +33,7 @@ const RestaurantSignup = () => {
         try {
             const response = await axios.post('http://localhost:5000/api/restaurants/signup', data);
             alert(response.data.message);
-            navigate('/restaurant/login'); // Redirect after successful signup
+            navigate('/restaurant/login');
         } catch (error) {
             alert('Error: ' + (error.response?.data?.error || "Signup failed!"));
         }

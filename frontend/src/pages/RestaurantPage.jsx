@@ -14,7 +14,7 @@ function RestaurantPage({ addToCart }) {
 
   const fetchRestaurantDetails = async () => {
     try {
-      console.log("Fetching details for restaurant ID:", id);  // ✅ Debugging log
+      console.log("Fetching details for restaurant ID:", id); 
 
       // Get restaurant details
       const restaurantResponse = await axios.get(`http://localhost:5000/api/restaurants/${id}`);

@@ -20,7 +20,7 @@ function Signup() {
       console.log("Signup successful:", response.data);
       alert("Account created successfully! Please log in.");
       
-      navigate("/login"); // Redirect to login page after signup
+      navigate("/login");
     } catch (error) {
       console.error("Signup failed:", error);
       alert("Signup failed. Try again.");
@@ -85,43 +85,3 @@ function Signup() {
 }
 
 export default Signup;
-
-
-
-
-
-
-/*import React, { useState } from "react";
-import axios from "axios";
-
-function Signup() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSignup = async () => {
-    try {
-      const response = await axios.post("http://localhost:5000/api/users/signup", {
-        name,
-        email,
-        password
-      });
-      console.log("Signup successful:", response.data);
-    } catch (error) {
-      console.error("Signup failed:", error);
-    }
-  };
-
-  return (
-    <div>
-      <h2>Signup</h2>
-      <input type="text" placeholder="Name" onChange={(e) => setName(e.target.value)} />
-      <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-      <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
-      <button onClick={handleSignup}>Sign Up</button>
-    </div>
-  );
-}
-
-export default Signup;
-*/

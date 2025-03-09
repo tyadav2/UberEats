@@ -59,7 +59,7 @@ function Home() {
         <div className="mt-6 flex flex-col md:flex-row items-center gap-3 w-full max-w-2xl">
           {/* Address Input with Icon */}
           <div className="relative flex items-center rounded-lg shadow-md w-full">
-            <FaMapMarkerAlt className="absolute left-4 text-gray-500" /> {/* Map Pin Icon */}
+            <FaMapMarkerAlt className="absolute left-4 text-gray-500" />
             <input
               type="text"
               placeholder="Enter delivery address"
@@ -84,7 +84,7 @@ function Home() {
 
           {/* Dropdown with Icon */}
           <div className="relative flex items-center rounded-lg shadow-md">
-            <FaClock className="absolute left-4 text-gray-500" /> {/* Clock Icon */}
+            <FaClock className="absolute left-4 text-gray-500" />
             <select className="pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none">
               <option>Deliver now</option>
               <option>Schedule for later</option>

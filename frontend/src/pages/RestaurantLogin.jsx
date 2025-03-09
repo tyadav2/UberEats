@@ -16,7 +16,7 @@ const RestaurantLogin = () => {
             const response = await axios.post('http://localhost:5000/api/restaurants/login', data);
             localStorage.setItem('restaurantToken', response.data.token);
             alert(response.data.message);
-            navigate('/restaurant/dashboard'); // Redirect to dashboard
+            navigate('/restaurant/dashboard');
         } catch (error) {
             alert('Error: ' + (error.response?.data?.message || 'Login failed!'));
         }

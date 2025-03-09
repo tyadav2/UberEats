@@ -24,7 +24,7 @@ function Favorites() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setFavorites(response.data); // ✅ Ensure we get full restaurant details
+      setFavorites(response.data);
     } catch (error) {
       console.error("Error fetching favorites:", error);
     }

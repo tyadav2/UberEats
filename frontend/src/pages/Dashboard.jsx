@@ -5,7 +5,7 @@ import DashboardNavbar from '../components/DashboardNavbar';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import '../App.css'; // For styling
+import '../App.css';
 import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
@@ -47,7 +47,6 @@ function Dashboard() {
     setSortOrder(order);
   };
 
-  // Food categories with images
   const foodCategories = [
     { name: 'Burger', image: 'https://img.freepik.com/premium-vector/burger-icon-cartoon-hamburger-fast-food-symbol_80590-14811.jpg' },
     { name: 'Caribbean', image: 'https://static.vecteezy.com/system/resources/previews/049/700/597/non_2x/traditional-mole-poblano-with-rice-vector.jpg' },
@@ -179,6 +178,3 @@ function Dashboard() {
 }
 
 export default Dashboard;
-
-
-

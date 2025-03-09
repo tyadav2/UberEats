@@ -43,7 +43,6 @@ function Orders() {
         headers: { Authorization: `Bearer ${token}` },
       });
   
-      // ✅ Remove the canceled order from the UI
       setOrders((prevOrders) => prevOrders.filter(order => order.id !== orderId));
       alert("Order canceled successfully!");
     } catch (error) {
@@ -113,7 +112,7 @@ function Orders() {
                     onClick={() => handleCancelOrder(order.id)}
                     className="mt-3 bg-red-500 text-white px-4 py-2 rounded w-full hover:bg-red-600 transition"
                   >
-                    ❌ Cancel Order
+                    Cancel Order
                   </button>
                 )}
               </div>
