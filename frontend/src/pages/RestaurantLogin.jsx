@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 const RestaurantLogin = () => {
     const [email, setEmail] = useState('');
@@ -24,8 +25,9 @@ const RestaurantLogin = () => {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+            <Navbar hideBranding={true} />
             {/* Logo with Home Redirection */}
-            <div className="absolute top-6 left-6 cursor-pointer" onClick={() => navigate('/')}>
+            <div className="absolute top-6 left-12 cursor-pointer" onClick={() => navigate('/')}>
                 <h1 className="text-2xl font-bold text-green-600">
                     Uber Eats <span className="text-gray-700">for Merchants</span>
                 </h1>
