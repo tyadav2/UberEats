@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Navbar() {
+function Navbar({ hideBranding }) {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -25,6 +25,7 @@ function Navbar() {
     setIsOpen(false);
   };
 
+
   return (
     <>
       {/* Navbar */}
@@ -35,12 +36,14 @@ function Navbar() {
         </button>
 
         {/* Clickable Uber Eats Branding */}
-        <div
-          className="text-2xl font-bold ml-4 flex-1 cursor-pointer"
-          onClick={() => navigate("/")}
-        >
-          Uber <span className="text-green-600 ml-1">Eats</span>
-        </div>
+        {!hideBranding && (
+          <div
+            className="text-2xl font-bold ml-4 flex-1 cursor-pointer"
+            onClick={() => navigate("/")}
+          >
+            Uber <span className="text-green-600 ml-1">Eats</span>
+          </div>
+        )}
 
         <ul className="flex gap-6 items-center text-lg font-medium">
           <li>
