@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+
 import DashboardNavbar from '../components/DashboardNavbar';
 
 function Favorites() {
   const [favorites, setFavorites] = useState([]);
-  const navigate = useNavigate();
+
 
   useEffect(() => {
     fetchFavorites();
