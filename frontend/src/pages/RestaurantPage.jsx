@@ -117,7 +117,7 @@ const RestaurantPage = () => {
     <div className="min-h-screen bg-gray-50">
       <DashboardNavbar />
       
-      {/* Hero Section - Now positioned below the navbar */}
+      {/* Hero Section */}
       <div className="relative w-full h-96 mt-16">
         <div className="absolute inset-0 bg-black/40 z-10"></div>
         <div 
@@ -142,7 +142,7 @@ const RestaurantPage = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-30">
-        {/* Cart Button - Floating */}
+        {/* Cart Button*/}
         <div className="fixed bottom-6 right-6 z-50">
           <button
             onClick={() => navigate("/cart")}
