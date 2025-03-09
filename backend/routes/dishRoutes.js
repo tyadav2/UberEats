@@ -1,4 +1,3 @@
-// routes/dishRoutes.js
 const express = require("express");
 const router = express.Router();
 const { addDish, updateDish, deleteDish, getDishes, getDishesByRestaurantId } = require("../controllers/dishController");
