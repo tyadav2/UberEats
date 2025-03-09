@@ -46,7 +46,7 @@ function DashboardNavbar() {
         console.error("Address fetch error:", error);
       }
     } else {
-      setSuggestions([]); // Clear suggestions when input is less than 3 chars
+      setSuggestions([]);
     }
   };
 

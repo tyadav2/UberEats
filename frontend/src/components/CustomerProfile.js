@@ -10,7 +10,6 @@ const CustomerProfile = () => {
     const [profilePicture, setProfilePicture] = useState(null);
 
     useEffect(() => {
-        // Fetch user data
         const fetchUserData = async () => {
             try {
                 const response = await axios.get('http://localhost:5000/api/users/profile', {

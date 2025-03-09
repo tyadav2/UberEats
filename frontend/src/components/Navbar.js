@@ -37,7 +37,7 @@ function Navbar() {
         {/* Clickable Uber Eats Branding */}
         <div
           className="text-2xl font-bold ml-4 flex-1 cursor-pointer"
-          onClick={() => navigate("/")} // Navigate to Home when clicked
+          onClick={() => navigate("/")}
         >
           Uber <span className="text-green-600 ml-1">Eats</span>
         </div>
@@ -84,7 +84,7 @@ function Navbar() {
         {/* Clickable Uber Eats Branding */}
         <div
           className="text-2xl font-bold text-black flex items-center mb-6 cursor-pointer"
-          onClick={() => navigate("/")} // Navigate to Home when clicked
+          onClick={() => navigate("/")}
         >
           Uber <span className="text-green-600 ml-1">Eats</span>
         </div>

@@ -1,12 +1,10 @@
-// src/components/RestaurantList.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function RestaurantList() {
-  // State to store restaurants and the current sorting order
   const [restaurants, setRestaurants] = useState([]);
   const [sortedRestaurants, setSortedRestaurants] = useState([]);
-  const [sortOrder, setSortOrder] = useState('default'); // 'default', 'asc', or 'desc'
+  const [sortOrder, setSortOrder] = useState('default');
 
   // Fetch restaurants when the component mounts
   useEffect(() => {
