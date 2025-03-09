@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { addDish, updateDish, deleteDish, getDishes, getDishesByRestaurantId } = require("../controllers/dishController");
+const { addDish, updateDish, deleteDish, getDishes, getDishesByRestaurantId, getDishById} = require("../controllers/dishController");
 const { getAllDishes } = require("../controllers/dishController");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -20,6 +20,9 @@ router.get("/public", getAllDishes);
 
 // Public route to get dishes by restaurant ID
 router.get("/restaurant/:restaurantId", getDishesByRestaurantId);
+
+// New route to get dish details by ID
+router.get("/:id", getDishById);
 
 
 module.exports = router;
