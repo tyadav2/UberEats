@@ -146,7 +146,7 @@ function Dashboard() {
     <div 
     key={rest.id} 
     className="relative bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition duration-300 ease-in-out"
-    onClick={() => navigate(`/restaurant/${rest.id}`)}
+    onClick={() => navigate(`/restaurants/${rest.id}`)}
   >
   
 
