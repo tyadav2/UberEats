@@ -18,7 +18,7 @@ This project is a prototype of **UberEATS**, developed using **React.js** for th
 - **Menu Management** – Add, edit, and view dishes  
 - **Orders Management** – View, filter, and update order statuses
 
-### Steps to run the application
+## Steps to run the application
 
 #### Start Server
 - Ensure you have MySQL running
