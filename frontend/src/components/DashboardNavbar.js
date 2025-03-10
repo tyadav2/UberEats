@@ -71,7 +71,7 @@ function DashboardNavbar() {
     setTimeout(() => {
       navigate("/login");
       setIsOpen(false);
-    }, 2000);
+    }, 500);
   };
   
 
