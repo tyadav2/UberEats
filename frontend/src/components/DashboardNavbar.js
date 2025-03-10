@@ -83,7 +83,6 @@ function DashboardNavbar() {
   };
 
   const handleAppClick = (platform) => {
-    // You can replace these URLs with your actual app store links
     if (platform === 'ios') {
       window.open('https://apps.apple.com/us/app/uber-eats-food-delivery', '_blank');
     } else if (platform === 'android') {
