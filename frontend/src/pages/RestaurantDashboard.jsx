@@ -322,6 +322,7 @@ const getOrderCounts = () => {
             case "New": return "bg-blue-500";
             case "Preparing": return "bg-yellow-500";
             case "On the way": return "bg-purple-500";
+            case "Pick Up Ready": return "bg-pink-500";
             case "Delivered": return "bg-green-500";
             default: return "bg-gray-500";
         }
@@ -669,6 +670,15 @@ const getOrderCounts = () => {
                 </p>
                 <p className="text-sm text-purple-500 mt-1">Out for delivery</p>
             </div>
+
+            <div className="bg-pink-50 border border-pink-200 rounded-lg p-4">
+                <h4 className="text-lg font-semibold text-pink-700 mb-2">Pick Up Ready</h4>
+                <p className="text-3xl font-bold text-pink-600">
+                    {orders.filter(order => order.status === "Pick Up Ready").length}
+                </p>
+                <p className="text-sm text-pink-500 mt-1">Ready for pickup</p>
+            </div>
+
             
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <h4 className="text-lg font-semibold text-green-700 mb-2">Delivered</h4>
@@ -778,6 +788,17 @@ const getOrderCounts = () => {
                     >
                         Preparing
                     </button>
+                    
+                    {!orderDetails.deliveryAddress && (
+                        <button 
+                            onClick={() => updateOrderStatus(orderDetails.id, "Pick Up Ready")}
+                            className={`px-3 py-1 text-sm rounded ${orderDetails.status === "Pick Up Ready" ? 'bg-pink-600 text-white' : 'bg-pink-100 text-pink-700'}`}
+                            disabled={orderDetails.status === "Pick Up Ready"}
+                        >
+                            Pick Up Ready
+                        </button>
+                    )}
+
                     <button 
                         onClick={() => updateOrderStatus(orderDetails.id, "On the way")}
                         className={`px-3 py-1 text-sm rounded ${orderDetails.status === "On the way" ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700'}`}
