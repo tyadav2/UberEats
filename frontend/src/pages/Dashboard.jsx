@@ -121,15 +121,15 @@ function Dashboard() {
 
   const foodCategories = [
     { name: 'Burger', image: 'https://img.freepik.com/premium-vector/burger-icon-cartoon-hamburger-fast-food-symbol_80590-14811.jpg' },
-    { name: 'Caribbean', image: 'https://static.vecteezy.com/system/resources/previews/049/700/597/non_2x/traditional-mole-poblano-with-rice-vector.jpg' },
+    { name: 'Steakhouse', image: 'https://cdn.vectorstock.com/i/1000v/22/61/steak-house-logo-icon-on-black-vector-23892261.jpg' },
     { name: 'Drinks', image: 'https://cdn-icons-png.flaticon.com/512/820/820603.png' },
     { name: 'Fast Food', image: 'https://cdn3.vectorstock.com/i/1000x1000/53/47/french-fries-icon-design-template-isolated-vector-48915347.jpg' },
     { name: 'Grocery', image: 'https://thumbs.dreamstime.com/b/isolated-grocery-bag-icon-groceries-icons-vector-191341179.jpg' },
     { name: 'Dessert', image: 'https://cdn-icons-png.flaticon.com/512/1205/1205153.png' },
     { name: 'Japanese', image: 'https://static.vecteezy.com/system/resources/previews/012/450/052/non_2x/ramen-noodle-illustration-cartoon-food-and-drink-logo-japanese-food-icon-bowl-and-chopsticks-symbol-free-vector.jpg' },
     { name: 'Italian', image: 'https://st2.depositphotos.com/36103482/49106/v/450/depositphotos_491068272-stock-illustration-fried-noodle-on-plate-vintage.jpg' },
-    { name: 'Box Catering', image: 'https://www.shutterstock.com/image-vector/takeaway-food-line-icon-carton-600nw-2498936087.jpg' },
-    { name: 'Seafood', image: 'https://cdn-icons-png.flaticon.com/512/4223/4223439.png' },
+    { name: 'Vegetarian Friendly', image: 'https://png.pngtree.com/png-vector/20220630/ourmid/pngtree-vegetarian-food-icon-featuring-leaves-fork-and-spoon-in-vector-format-vector-png-image_37487134.png' },
+    { name: 'Halal', image: 'https://c8.alamy.com/comp/2G0PAKR/vector-red-circle-stamp-sign-halal-allowed-to-eat-and-drink-in-islam-people-at-transparent-effect-background-2G0PAKR.jpg' },
     { name: 'Sushi', image: 'https://img.freepik.com/premium-vector/sushi-icon-isometric-3d-style-isolated-white-background-food-symbol_96318-12374.jpg' },
     { name: 'Alcohol', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6ycKycUpkZiYvTiIfzrAatAgrXkOOfbpoOw&s' },
     { name: 'Wings', image: 'https://static.vecteezy.com/system/resources/previews/008/441/867/non_2x/crispy-fried-chicken-leg-illustration-flat-icon-illustration-design-fast-food-fried-chicken-leg-flat-design-vector.jpg' }
