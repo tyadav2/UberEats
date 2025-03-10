@@ -13,6 +13,9 @@ import {
   FaSignOutAlt,
   FaSearch,
   FaShoppingCart,
+  FaApple,
+  FaAndroid,
+  FaTimes
 } from "react-icons/fa";
 
 function DashboardNavbar() {
@@ -75,9 +78,17 @@ function DashboardNavbar() {
     }, 500);
   };
   
-
   const handleCartClick = () => {
     navigate("/cart");
+  };
+
+  const handleAppClick = (platform) => {
+    // You can replace these URLs with your actual app store links
+    if (platform === 'ios') {
+      window.open('https://apps.apple.com/us/app/uber-eats-food-delivery', '_blank');
+    } else if (platform === 'android') {
+      window.open('https://play.google.com/store/apps/details?id=com.ubercab.eats', '_blank');
+    }
   };
 
   return (
@@ -102,30 +113,31 @@ function DashboardNavbar() {
         <div className="ml-6">
           <ToggleButtons />
         </div>
+        
         {/* Address Lookup Input */}
-<div className="nav-center flex-1 mx-4 relative">
-  <input
-    type="text"
-    placeholder="Enter your address"
-    value={address}
-    onChange={handleInputChange}
-    className="address-input w-full p-2 rounded-full border border-gray-300 relative z-20"
-  />
-  {/* Address Suggestions Dropdown */}
-  {suggestions.length > 0 && (
-    <ul className="absolute left-0 right-0 w-full bg-white border border-gray-300 mt-20 rounded-lg shadow-lg max-h-40 overflow-y-auto z-50">
-      {suggestions.map((suggestion) => (
-        <li
-          key={suggestion.place_id}
-          className="p-2 cursor-pointer hover:bg-gray-100"
-          onClick={() => handleSelect(suggestion.display_name)}
-        >
-          {suggestion.display_name}
-        </li>
-      ))}
-    </ul>
-  )}
-</div>
+        <div className="nav-center flex-1 mx-4 relative">
+          <input
+            type="text"
+            placeholder="Enter your address"
+            value={address}
+            onChange={handleInputChange}
+            className="address-input w-full p-2 rounded-full border border-gray-300 relative z-20"
+          />
+          {/* Address Suggestions Dropdown */}
+          {suggestions.length > 0 && (
+            <ul className="absolute left-0 right-0 w-full bg-white border border-gray-300 mt-20 rounded-lg shadow-lg max-h-40 overflow-y-auto z-50">
+              {suggestions.map((suggestion) => (
+                <li
+                  key={suggestion.place_id}
+                  className="p-2 cursor-pointer hover:bg-gray-100"
+                  onClick={() => handleSelect(suggestion.display_name)}
+                >
+                  {suggestion.display_name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         {/* Search input */}
         <div className="nav-center flex-1 mx-4 relative">
@@ -137,19 +149,19 @@ function DashboardNavbar() {
           />
         </div>
 
-      {/* Logout button on the main navbar */}
-      <ul className="flex gap-6 items-center text-lg font-medium">
-        <li>
-          <button onClick={handleCartClick}>
-            <FaShoppingCart />
-          </button>
-        </li>
-        <li>
-          <button onClick={handleLogout}>
-            <FaSignOutAlt className="text-xl" />
-          </button>
-        </li>
-      </ul>
+        {/* Logout button on the main navbar */}
+        <ul className="flex gap-6 items-center text-lg font-medium">
+          <li>
+            <button onClick={handleCartClick}>
+              <FaShoppingCart />
+            </button>
+          </li>
+          <li>
+            <button onClick={handleLogout}>
+              <FaSignOutAlt className="text-xl" />
+            </button>
+          </li>
+        </ul>
       </nav>
 
       {/* Sidebar Background Overlay */}
@@ -160,76 +172,123 @@ function DashboardNavbar() {
         ></div>
       )}
 
-      {/* Sidebar Menu */}
+      {/* Enhanced Sidebar Menu */}
       <div
-        className={`fixed inset-y-0 left-0 w-64 bg-white p-6 z-30 transition-transform transform ${
+        className={`fixed inset-y-0 left-0 w-72 bg-white shadow-xl z-30 transition-transform transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        } flex flex-col`}
       >
-        {/* Close Button */}
-        <button
-          className="mb-6 text-xl font-semibold"
-          onClick={() => setIsOpen(false)}
-        >
-          ✕
-        </button>
+        <div className="p-6">
+          {/* Close Button */}
+          <button
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+            onClick={() => setIsOpen(false)}
+          >
+            <FaTimes className="text-xl" />
+          </button>
 
-        {/* Clickable Uber Eats Branding */}
-        <div
-          className="text-2xl font-bold text-black flex items-center mb-6 cursor-pointer"
-          onClick={() => navigate("/")}
-        >
-          Uber <span className="text-green-600 ml-1">Eats</span>
+          {/* Clickable Uber Eats Branding */}
+          <div
+            className="text-2xl font-bold text-black flex items-center mb-8 cursor-pointer"
+            onClick={() => navigate("/")}
+          >
+            Uber <span className="text-green-600 ml-1">Eats</span>
+          </div>
+
+          {/* Sidebar Links */}
+          <ul className="space-y-1">
+            <li className="rounded-lg overflow-hidden hover:bg-gray-100">
+              <button 
+                onClick={() => navigate("/orders")} 
+                className="flex items-center w-full p-3 text-gray-700 hover:text-green-600 transition duration-200"
+              >
+                <FaReceipt className="mr-4 text-gray-500" />
+                <span className="font-medium">Orders</span>
+              </button>
+            </li>
+            
+            <li className="rounded-lg overflow-hidden hover:bg-gray-100">
+              <button 
+                onClick={() => navigate("/favorites")} 
+                className="flex items-center w-full p-3 text-gray-700 hover:text-green-600 transition duration-200"
+              >
+                <FaHeart className="mr-4 text-gray-500" />
+                <span className="font-medium">Favorites</span>
+              </button>
+            </li>
+            
+            <li className="rounded-lg overflow-hidden hover:bg-gray-100">
+              <button 
+                onClick={() => navigate("/profile")} 
+                className="flex items-center w-full p-3 text-gray-700 hover:text-green-600 transition duration-200"
+              >
+                <FaUser className="mr-4 text-gray-500" />
+                <span className="font-medium">Profile</span>
+              </button>
+            </li>
+            
+            <li className="rounded-lg overflow-hidden hover:bg-gray-100">
+              <button 
+                onClick={() => navigate("/restaurant/signup")} 
+                className="flex items-center w-full p-3 text-gray-700 hover:text-green-600 transition duration-200"
+              >
+                <FaBuilding className="mr-4 text-gray-500" />
+                <span className="font-medium">Create a Business Account</span>
+              </button>
+            </li>
+            
+            <li className="rounded-lg overflow-hidden hover:bg-gray-100">
+              <button 
+                onClick={() => navigate("/restaurant/signup")} 
+                className="flex items-center w-full p-3 text-gray-700 hover:text-green-600 transition duration-200"
+              >
+                <FaPlusCircle className="mr-4 text-gray-500" />
+                <span className="font-medium">Add your restaurant</span>
+              </button>
+            </li>
+            
+            <li className="rounded-lg overflow-hidden hover:bg-gray-100">
+              <button 
+                onClick={() => navigate("/restaurant/signup")} 
+                className="flex items-center w-full p-3 text-gray-700 hover:text-green-600 transition duration-200"
+              >
+                <FaMotorcycle className="mr-4 text-gray-500" />
+                <span className="font-medium">Sign up to deliver</span>
+              </button>
+            </li>
+          </ul>
+
+          <div className="mt-6 border-t border-gray-200 pt-6">
+            <button 
+              onClick={handleLogout} 
+              className="flex items-center w-full p-3 rounded-lg text-gray-700 hover:text-green-600 hover:bg-gray-100 transition duration-200"
+            >
+              <FaSignOutAlt className="mr-4 text-gray-500" />
+              <span className="font-medium">Sign out</span>
+            </button>
+          </div>
         </div>
-
-        {/* Sidebar Links */}
-        <ul className="space-y-4">
-          <li className="flex items-center py-2 border-b border-gray-200">
-            <FaReceipt className="mr-2" />
-            <button onClick={() => navigate("/orders")} className="hover:text-green-600">
-              Orders
+        
+        {/* App Download Section at Bottom */}
+        <div className="mt-auto p-6 bg-gray-50 rounded-t-lg border-t border-gray-200">
+          <p className="text-gray-600 text-sm mb-3 font-medium">Get the app</p>
+          <div className="flex space-x-2">
+            <button 
+              onClick={() => handleAppClick('ios')} 
+              className="flex-1 flex items-center justify-center gap-2 bg-black text-white py-2 px-4 rounded-lg hover:bg-gray-800 transition duration-200"
+            >
+              <FaApple className="text-xl" />
+              <span className="text-sm">iOS</span>
             </button>
-          </li>
-          <li className="flex items-center py-2 border-b border-gray-200">
-            <FaHeart className="mr-2" />
-            <button onClick={() => navigate("/favorites")} className="hover:text-green-600">
-              Favorites
+            <button 
+              onClick={() => handleAppClick('android')} 
+              className="flex-1 flex items-center justify-center gap-2 bg-black text-white py-2 px-4 rounded-lg hover:bg-gray-800 transition duration-200"
+            >
+              <FaAndroid className="text-xl" />
+              <span className="text-sm">Android</span>
             </button>
-          </li>
-          <li className="flex items-center py-2 border-b border-gray-200">
-            <FaUser className="mr-2" />
-            <button onClick={() => navigate("/profile")} className="hover:text-green-600">
-              Profile
-            </button>
-          </li>
-          <li className="flex items-center py-2 border-b border-gray-200">
-            <FaBuilding className="mr-2" />
-            <button onClick={() => navigate("/restaurant/dashboard")} className="hover:text-green-600">
-              Create a Business Account
-            </button>
-          </li>
-          <li className="flex items-center py-2 border-b border-gray-200">
-            <FaPlusCircle className="mr-2" />
-            <button onClick={() => navigate("/restaurant/signup")} className="hover:text-green-600">
-              Add your restaurant
-            </button>
-          </li>
-          <li className="flex items-center py-2 border-b border-gray-200">
-            <FaMotorcycle className="mr-2" />
-            <button onClick={() => navigate("/restaurant/signup")} className="hover:text-green-600">
-              Sign up to deliver
-            </button>
-          </li>
-        </ul>
-
-        <ul className="mt-6">
-          <li className="flex items-center py-2 border-b border-gray-200">
-            <FaSignOutAlt className="mr-2" />
-            <button onClick={handleLogout} className="hover:text-green-600">
-              Sign out
-            </button>
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
     </>
   );
