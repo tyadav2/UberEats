@@ -414,10 +414,10 @@ function Dashboard() {
               <div className="mt-6">
                 <h4 className="text-sm font-semibold mb-2">Get the app</h4>
                 <div className="flex space-x-2">
-                  <a href="#" className="border border-white rounded px-3 py-2 text-sm inline-block hover:bg-white hover:text-black transition-colors">
+                  <a href="https://apps.apple.com/us/app/uber-eats-food-delivery" className="border border-white rounded px-3 py-2 text-sm inline-block hover:bg-white hover:text-black transition-colors" target="_blank" rel="noreferrer"> 
                     App Store
                   </a>
-                  <a href="#" className="border border-white rounded px-3 py-2 text-sm inline-block hover:bg-white hover:text-black transition-colors">
+                  <a href="https://play.google.com/store/apps/details?id=com.ubercab.eats" className="border border-white rounded px-3 py-2 text-sm inline-block hover:bg-white hover:text-black transition-colors" target="_blank" rel="noreferrer">
                     Google Play
                   </a>
                 </div>
