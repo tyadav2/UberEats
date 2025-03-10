@@ -59,6 +59,7 @@ function DashboardNavbar() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("customerToken");
     toast.success('Successfully logged out!', {
       position: "top-right",
       autoClose: 2000,
@@ -71,7 +72,7 @@ function DashboardNavbar() {
     setTimeout(() => {
       navigate("/login");
       setIsOpen(false);
-    }, 2000);
+    }, 500);
   };
   
 
