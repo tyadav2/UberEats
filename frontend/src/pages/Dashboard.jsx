@@ -306,7 +306,7 @@ function Dashboard() {
                       {/* Promotional Tag */}
                       {Math.random() > 0.7 && (
                         <div className="absolute top-3 left-3 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
-                          $0 Delivery Fee
+                          Top Pick
                         </div>
                       )}
                     </div>
