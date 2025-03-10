@@ -21,13 +21,13 @@ This project is a prototype of **UberEATS**, developed using **React.js** for th
 ### Steps to run the application
 
 #### Start Server
-- **Ensure you have MySQL running
-- **Add the credentials to your DB in a .env in backend directory
-- **Create a database uber_eats in MySQL
-- **Navigate to the backend directory and run "npm i"
-- **Use "node server.js" to start backend
+- Ensure you have MySQL running
+- Add the credentials to your DB in a .env in backend directory
+- Create a database uber_eats in MySQL
+- Navigate to the backend directory and run "npm i"
+- Use "node server.js" to start backend
 
 #### Start Client
-- **Navigate to frontend directory
-- **Run "npm i"
-- **Use "npm start" to start the service
+- Navigate to frontend directory
+- Run "npm i"
+- Use "npm start" to start the service
