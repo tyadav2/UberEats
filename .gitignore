@@ -5,14 +5,8 @@ backend/node_modules/
 # ignore .env which contains sensitive information
 backend/.env
 
-<<<<<<< Updated upstream
 # ignoring sequelize-cli generated files
 backend/migrations/*.js
 backend/config/config.js
 backend/models/index.js
-=======
-backend/migrations/*.js
-backend/config/config.js
-backend/models/index.js
->>>>>>> Stashed changes
 temp.js
