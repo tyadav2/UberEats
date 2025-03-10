@@ -286,14 +286,14 @@ const RestaurantDashboard = () => {
     // Update the getOrderCounts function
 const getOrderCounts = () => {
     const counts = {
-        pending: 0,
+        new: 0,
         preparing: 0,
         onTheWay: 0,
         delivered: 0
     };
     
     orders.forEach(order => {
-        if (order.status === "Pending") counts.pending++;
+        if (order.status === "New") counts.new++;
         else if (order.status === "Preparing") counts.preparing++;
         else if (order.status === "On the way") counts.onTheWay++;
         else if (order.status === "Delivered") counts.delivered++;
@@ -319,7 +319,7 @@ const getOrderCounts = () => {
     // Get status badge color
     const getStatusColor = (status) => {
         switch(status) {
-            case "Pending": return "bg-blue-500";
+            case "New": return "bg-blue-500";
             case "Preparing": return "bg-yellow-500";
             case "On the way": return "bg-purple-500";
             case "Delivered": return "bg-green-500";
@@ -647,9 +647,9 @@ const getOrderCounts = () => {
         {/* Order Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="text-lg font-semibold text-blue-700 mb-2">Pending Orders</h4>
+                <h4 className="text-lg font-semibold text-blue-700 mb-2">New Orders</h4>
                 <p className="text-3xl font-bold text-blue-600">
-                    {orders.filter(order => order.status === "Pending").length}
+                    {orders.filter(order => order.status === "New").length}
                 </p>
                 <p className="text-sm text-blue-500 mt-1">Awaiting processing</p>
             </div>
@@ -689,6 +689,7 @@ const getOrderCounts = () => {
                         <tr className="bg-gray-100">
                             <th className="py-3 px-4 text-left">Order ID</th>
                             <th className="py-3 px-4 text-left">Customer</th>
+                            <th className="py-3 px-4 text-left">Address</th>
                             <th className="py-3 px-4 text-left">Date & Time</th>
                             <th className="py-3 px-4 text-left">Total</th>
                             <th className="py-3 px-4 text-left">Est. Delivery</th>
@@ -702,6 +703,7 @@ const getOrderCounts = () => {
                             <tr key={order.id} className="border-t border-gray-200 hover:bg-gray-50">
                                 <td className="py-3 px-4">#{order.id}</td>
                                 <td className="py-3 px-4">{order.userEmail}</td>
+                                <td className="py-3 px-4">{order.deliveryAddress || <span className="inline-block px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-sm">Pick Up Order</span>}</td>
                                 <td className="py-3 px-4">{formatDate(order.createdAt)}</td>
                                 <td className="py-3 px-4">${parseFloat(order.totalAmount).toFixed(2)}</td>
                                 <td className="py-3 px-4">{order.estimatedDeliveryTime}</td>
@@ -744,8 +746,9 @@ const getOrderCounts = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="border rounded-lg p-4">
                 <h4 className="font-semibold text-lg mb-3">Customer Information</h4>
-                <p><span className="font-medium">User ID:</span> {orderDetails.userId}</p>
+                <p><span className="font-medium">Delivery Address:</span> {orderDetails.deliveryAddress || <span> Pick Up Order</span>}</p>
                 <p><span className="font-medium">Email:</span> {orderDetails.userEmail}</p>
+                
                 <p><span className="font-medium">Order Date:</span> {formatDate(orderDetails.createdAt)}</p>
                 <p><span className="font-medium">Payment Method:</span> {orderDetails.paymentMethod}</p>
                 <p><span className="font-medium">Estimated Delivery:</span> {orderDetails.estimatedDeliveryTime}</p>
@@ -762,11 +765,11 @@ const getOrderCounts = () => {
                 <h5 className="font-medium mb-2">Update Status:</h5>
                 <div className="flex flex-wrap gap-2">
                     <button 
-                        onClick={() => updateOrderStatus(orderDetails.id, "Pending")}
-                        className={`px-3 py-1 text-sm rounded ${orderDetails.status === "Pending" ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'}`}
-                        disabled={orderDetails.status === "Pending"}
+                        onClick={() => updateOrderStatus(orderDetails.id, "New")}
+                        className={`px-3 py-1 text-sm rounded ${orderDetails.status === "New" ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'}`}
+                        disabled={orderDetails.status === "New"}
                     >
-                        Pending
+                        New
                     </button>
                     <button 
                         onClick={() => updateOrderStatus(orderDetails.id, "Preparing")}
