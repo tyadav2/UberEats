@@ -145,6 +145,12 @@ const CartPage = () => {
         deliveryAddress: isPickup ? null : deliveryAddress,
         deliveryFee: isPickup ? 0 : deliveryFee
       };
+
+      console.log("Order data being sent:", {
+        ...orderData,
+        items: orderItems,
+        deliveryAddress: isPickup ? null : deliveryAddress
+      });
   
       const response = await axios.post("http://localhost:5000/api/orders", orderData, {
         headers: { Authorization: `Bearer ${token}` }
