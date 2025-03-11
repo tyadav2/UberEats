@@ -324,6 +324,7 @@ const getOrderCounts = () => {
             case "On the way": return "bg-purple-500";
             case "Pick Up Ready": return "bg-pink-500";
             case "Delivered": return "bg-green-500";
+            case "Cancelled": return "bg-red-500";
             default: return "bg-gray-500";
         }
     };
@@ -688,6 +689,14 @@ const getOrderCounts = () => {
                 <p className="text-sm text-green-500 mt-1">Completed orders</p>
             </div>
         </div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <h4 className="text-lg font-semibold text-red-700 mb-2">Cancelled</h4>
+            <p className="text-3xl font-bold text-red-600">
+                {orders.filter(order => order.status === "Cancelled").length}
+            </p>
+            <p className="text-sm text-red-500 mt-1">Cancelled orders</p>
+        </div>
+
                         
                         {/* Orders Table */}
                         {orders.length === 0 ? (
@@ -813,6 +822,14 @@ const getOrderCounts = () => {
                     >
                         Delivered
                     </button>
+                    <button 
+                        onClick={() => updateOrderStatus(orderDetails.id, "Cancelled")}
+                        className={`px-3 py-1 text-sm rounded ${orderDetails.status === "Cancelled" ? 'bg-red-600 text-white' : 'bg-red-100 text-red-700'}`}
+                        disabled={orderDetails.status === "Cancelled" || orderDetails.status === "Delivered"}
+                    >
+                        Cancel Order
+                    </button>
+
                 </div>
             </div>
         </div>
