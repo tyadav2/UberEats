@@ -13,6 +13,7 @@ import Profile from "./pages/UserProfile";
 import Orders from "./pages/Orders";
 import CartPage from "./pages/CartPage";
 import RestaurantPage from "./pages/RestaurantPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
     
@@ -20,10 +21,10 @@ function App() {
     return (
         <Router>
             <Routes>
+            <Route path="/dashboard" element={<ProtectedRoute> <Dashboard /> </ProtectedRoute>} />
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
-                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/restaurant/signup" element={<RestaurantSignup />} />
                 <Route path="/restaurant/login" element={<RestaurantLogin />} />
                 <Route path ="/restaurant/dashboard" element={<RestaurantDashboard />} />
